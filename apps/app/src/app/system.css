@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@import "./globals.css";
+
+:root {
+	--app-w: 1680px !important;
+	--app-px: 1rem !important;
+
+	--header-w: 1680px !important;
+	--header-px: 1rem !important;
+
+	--footer-w: 1680px !important;
+	--footer-px: 1rem !important;
+}
+
+:root {
+	--tronica-letter-spacing: -0.09em;
+	--geist-letter-spacing: 0em;
+	--inter-letter-spacing: -0.05em;
+}
+
+@theme inline {
+	--font-tronica-mono: var(--font-tronica-mono);
+	--font-geist: var(--font-geist-sans);
+	--font-inter: var(--font-inter-sans);
+}
+
+@layer base {
+	.font-tronica-mono {
+		letter-spacing: var(--tronica-letter-spacing);
+	}
+	.font-geist {
+		letter-spacing: var(--geist-letter-spacing);
+	}
+	.font-inter {
+		letter-spacing: var(--inter-letter-spacing);
+	}
+}

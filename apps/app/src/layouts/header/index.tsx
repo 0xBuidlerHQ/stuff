@@ -1,0 +1,54 @@
+import Link from "next/link";
+import { links } from "@/config/links";
+import { ConnectButton } from "@/features/web3/connectButton";
+import { Box } from "@/primitives/box";
+import { Button } from "@/primitives/button";
+import { HeaderPrimitive } from "@/primitives/header";
+
+const Header = () => {
+	return (
+		<HeaderPrimitive>
+			<Box className="flex justify-between">
+				<Box className="flex items-center">
+					<Link className="text-sm font-medium" href={links.home.url}>
+						MONO
+					</Link>
+
+					<Box className="w-8 flex items-center justify-center">
+						<Box className="h-4 w-px bg-muted-foreground" />
+					</Box>
+
+					<Navigation />
+				</Box>
+
+				<Box>
+					<ConnectButton />
+				</Box>
+			</Box>
+
+			<div className="bg-muted h-px" />
+		</HeaderPrimitive>
+	);
+};
+
+const NavigationItems = [links.projects, links.about];
+
+const Navigation = () => {
+	return (
+		<Box className="flex items-center justify-center gap-4">
+			{NavigationItems.map((navigationItem) => {
+				return (
+					<Button
+						key={navigationItem.url}
+						href={navigationItem.url}
+						className="transition-all hover:bg-red-500 hover:text-background"
+					>
+						<Box className="text-xs px-1">{navigationItem.name}</Box>
+					</Button>
+				);
+			})}
+		</Box>
+	);
+};
+
+export { Header };

@@ -1,0 +1,27 @@
+{
+  "StuffERC721": {
+    "31337": "0xf6B55614076BA5D1C1bc737FEAC29D8c76FE1bb1",
+    "8453": "0x3170BF5c19340e1301f5eaF24DFE11ed55d31195"
+  },
+  "Echo": {
+    "31337": "0x654FB8fB55048BA0Df9241C4D0992118A5792b15"
+  },
+  "StuffFactory": {
+    "31337": "0x1C6dDd12225B411f20d6dCAf45113de632166FAd"
+  },
+  "EchoLifecycle": {
+    "31337": "0xB34e34fF88f0266d2591B56d9e6280567145330d"
+  },
+  "StuffGenesis": {
+    "31337": "0xb302EB0Dd6A7f6dFA228e669b80fE5e2120B2e87"
+  },
+  "EchoLifeCycleModule": {
+    "31337": "0x88a42e46e04F136D26349bb2dB2b2b8d0f14ce3d"
+  },
+  "EchoProgressModule": {
+    "31337": "0xE8e33B7326675Ed1f271f0315b796ef2402cd99E"
+  },
+  "USDC": {
+    "8453": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+  }
+}

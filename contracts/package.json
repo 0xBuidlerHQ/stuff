@@ -1,0 +1,28 @@
+{
+	"name": "@0xhq/stuff.contracts",
+	"version": "0.0.0",
+	"private": true,
+	"main": "./package/index.tsx",
+	"types": "./package/index.tsx",
+	"exports": {
+		".": "./package/index.tsx",
+		"./types.user": "./package/types.user.ts",
+		"./types.libs": "./package/types.libs.ts",
+		"./deployments.json": "./deployments/deployments.json"
+	},
+	"scripts": {
+		"dev": "(sleep 5 && make deploy && pnpm build) & make dev",
+		"build": "pnpm build-contract && pnpm build-wagmi && pnpm build-types",
+		"build-contract": "make build",
+		"build-wagmi": "pnpm wagmi generate",
+		"build-types": "pnpm tsx ts/script.ts"
+	},
+	"devDependencies": {
+		"@wagmi/cli": "^2.10.0",
+		"tsx": "^4.21.0"
+	},
+	"packageManager": "pnpm@10.13.1",
+	"engines": {
+		"node": ">=20"
+	}
+}
