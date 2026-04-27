@@ -1526,15 +1526,37 @@ export const stringsAbi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x3170BF5c19340e1301f5eaF24DFE11ed55d31195)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x2D9017b43264D8724D362441ECAB466539D0B393)
  * -
  */
 export const stuffErc721Abi = [
   {
     type: 'constructor',
     inputs: [
-      { name: '_usdc', internalType: 'contract IERC20', type: 'address' },
-      { name: '_paymentRecipient', internalType: 'address', type: 'address' },
+      { name: '_stuffId', internalType: 'uint256', type: 'uint256' },
+      {
+        name: '_stuffCollection',
+        internalType: 'struct StuffERC721.StuffCollection',
+        type: 'tuple',
+        components: [
+          { name: 'name', internalType: 'string', type: 'string' },
+          { name: 'symbol', internalType: 'string', type: 'string' },
+          { name: 'sku', internalType: 'string', type: 'string' },
+          { name: 'palette', internalType: 'string[]', type: 'string[]' },
+          {
+            name: 'paymentToken',
+            internalType: 'contract IERC20',
+            type: 'address',
+          },
+          {
+            name: 'paymentRecipient',
+            internalType: 'address',
+            type: 'address',
+          },
+          { name: 'maxSupply', internalType: 'uint256', type: 'uint256' },
+          { name: 'mintPriceToken', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
     ],
     stateMutability: 'nonpayable',
   },
@@ -1562,36 +1584,8 @@ export const stuffErc721Abi = [
   {
     type: 'function',
     inputs: [],
-    name: 'MAX_SUPPLY',
+    name: 'STUFF_ID',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'MINT_PRICE_USDC',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'PALETTE_SIZE',
-    outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'PAYMENT_RECIPIENT',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'USDC',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
     stateMutability: 'view',
   },
   {
@@ -1621,20 +1615,33 @@ export const stuffErc721Abi = [
   {
     type: 'function',
     inputs: [],
-    name: 'getPalette',
+    name: 'getCollection',
     outputs: [
       {
-        name: 'palette',
-        internalType: 'struct StuffERC721.Oklch[16]',
-        type: 'tuple[16]',
+        name: 'collection',
+        internalType: 'struct StuffERC721.StuffCollection',
+        type: 'tuple',
         components: [
-          { name: 'lightness', internalType: 'uint16', type: 'uint16' },
-          { name: 'chroma', internalType: 'uint16', type: 'uint16' },
-          { name: 'hue', internalType: 'uint16', type: 'uint16' },
+          { name: 'name', internalType: 'string', type: 'string' },
+          { name: 'symbol', internalType: 'string', type: 'string' },
+          { name: 'sku', internalType: 'string', type: 'string' },
+          { name: 'palette', internalType: 'string[]', type: 'string[]' },
+          {
+            name: 'paymentToken',
+            internalType: 'contract IERC20',
+            type: 'address',
+          },
+          {
+            name: 'paymentRecipient',
+            internalType: 'address',
+            type: 'address',
+          },
+          { name: 'maxSupply', internalType: 'uint256', type: 'uint256' },
+          { name: 'mintPriceToken', internalType: 'uint256', type: 'uint256' },
         ],
       },
     ],
-    stateMutability: 'pure',
+    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -1642,7 +1649,7 @@ export const stuffErc721Abi = [
     name: 'getStuff',
     outputs: [
       {
-        name: 'data',
+        name: 'stuff',
         internalType: 'struct StuffERC721.Stuff',
         type: 'tuple',
         components: [
@@ -1673,7 +1680,7 @@ export const stuffErc721Abi = [
       { name: '_to', internalType: 'address', type: 'address' },
       {
         name: '_params',
-        internalType: 'struct StuffERC721.StuffParams',
+        internalType: 'struct StuffERC721.StuffMintParams',
         type: 'tuple',
         components: [
           { name: 'authorName', internalType: 'string', type: 'string' },
@@ -1943,7 +1950,12 @@ export const stuffErc721Abi = [
     inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
     name: 'InvalidCanvasLength',
   },
-  { type: 'error', inputs: [], name: 'InvalidPaymentConfig' },
+  { type: 'error', inputs: [], name: 'InvalidConfig' },
+  {
+    type: 'error',
+    inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
+    name: 'InvalidPaletteLength',
+  },
   { type: 'error', inputs: [], name: 'MaxSupplyReached' },
   {
     type: 'error',
@@ -1958,19 +1970,116 @@ export const stuffErc721Abi = [
 ] as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x3170BF5c19340e1301f5eaF24DFE11ed55d31195)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x2D9017b43264D8724D362441ECAB466539D0B393)
  * -
  */
 export const stuffErc721Address = {
-  8453: '0x3170BF5c19340e1301f5eaF24DFE11ed55d31195',
+  8453: '0x2D9017b43264D8724D362441ECAB466539D0B393',
   31337: '0xf6B55614076BA5D1C1bc737FEAC29D8c76FE1bb1',
 } as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x3170BF5c19340e1301f5eaF24DFE11ed55d31195)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x2D9017b43264D8724D362441ECAB466539D0B393)
  * -
  */
 export const stuffErc721Config = {
   address: stuffErc721Address,
   abi: stuffErc721Abi,
+} as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// StuffFactory
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x3bA596A5307669d67AeF0d4De4679d93e0F91DA0)
+ * -
+ */
+export const stuffFactoryAbi = [
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: '_stuffCollection',
+        internalType: 'struct StuffERC721.StuffCollection',
+        type: 'tuple',
+        components: [
+          { name: 'name', internalType: 'string', type: 'string' },
+          { name: 'symbol', internalType: 'string', type: 'string' },
+          { name: 'sku', internalType: 'string', type: 'string' },
+          { name: 'palette', internalType: 'string[]', type: 'string[]' },
+          {
+            name: 'paymentToken',
+            internalType: 'contract IERC20',
+            type: 'address',
+          },
+          {
+            name: 'paymentRecipient',
+            internalType: 'address',
+            type: 'address',
+          },
+          { name: 'maxSupply', internalType: 'uint256', type: 'uint256' },
+          { name: 'mintPriceToken', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'createStuffERC721',
+    outputs: [
+      { name: 'stuff', internalType: 'contract StuffERC721', type: 'address' },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'stuffIdsIndex',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    name: 'stuffs',
+    outputs: [
+      { name: '', internalType: 'contract StuffERC721', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'stuffId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'stuffERC721',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'StuffERC721Created',
+  },
+] as const
+
+/**
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x3bA596A5307669d67AeF0d4De4679d93e0F91DA0)
+ * -
+ */
+export const stuffFactoryAddress = {
+  8453: '0x3bA596A5307669d67AeF0d4De4679d93e0F91DA0',
+  31337: '0x1C6dDd12225B411f20d6dCAf45113de632166FAd',
+} as const
+
+/**
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x3bA596A5307669d67AeF0d4De4679d93e0F91DA0)
+ * -
+ */
+export const stuffFactoryConfig = {
+  address: stuffFactoryAddress,
+  abi: stuffFactoryAbi,
 } as const

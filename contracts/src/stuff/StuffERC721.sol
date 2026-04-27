@@ -5,6 +5,7 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * @dev StuffERC721.
@@ -13,21 +14,34 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     using SafeERC20 for IERC20;
 
     /**
+     * @dev Important.
+     */
+    uint256 public immutable STUFF_ID;
+
+    /**
      * @dev Constants.
      */
-    uint256 public constant MAX_SUPPLY = 100;
-    uint256 public constant MINT_PRICE_USDC = 100e6;
-
     uint256 public constant CANVAS_WIDTH = 32;
     uint256 public constant CANVAS_HEIGHT = 32;
     uint256 public constant CANVAS_SIZE = CANVAS_WIDTH * CANVAS_HEIGHT;
 
-    uint8 public constant PALETTE_SIZE = 16;
+    /**
+     * @dev Struct StuffCollection.
+     */
+    struct StuffCollection {
+        string sku;
+        string[] palette;
+
+        IERC20 paymentToken;
+        address paymentRecipient;
+        uint256 maxSupply;
+        uint256 mintPriceToken;
+    }
 
     /**
-     * @dev Struct StuffParams.
+     * @dev Struct StuffMintParams.
      */
-    struct StuffParams {
+    struct StuffMintParams {
         string authorName;
 
         string title;
@@ -49,25 +63,18 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     }
 
     /**
-     * @dev Struct Oklch.
-     *
-     * Lightness and chroma are encoded in basis points:
-     * - lightness: 9800 = 98%
-     * - chroma: 2100 = 0.21
-     *
-     * Hue is encoded in degrees.
+     * @dev Privates.
      */
-    struct Oklch {
-        uint16 lightness;
-        uint16 chroma;
-        uint16 hue;
-    }
+    string private SKU;
+    string[] private PALETTE;
 
     /**
      * @dev Immutables.
      */
-    IERC20 public immutable USDC;
-    address public immutable PAYMENT_RECIPIENT;
+    IERC20 immutable PAYMENT_TOKEN;
+    address immutable PAYMENT_RECIPIENT;
+    uint256 immutable MAX_SUPPLY;
+    uint256 immutable MINT_PRICE_TOKEN;
 
     /**
      * @dev Variables.
@@ -87,7 +94,8 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     /**
      * @dev Errors.
      */
-    error InvalidPaymentConfig();
+    error InvalidConfig();
+    error InvalidPaletteLength(uint256 length);
     error MaxSupplyReached();
     error InvalidCanvasLength(uint256 length);
     error PaletteIndexOutOfRange(uint8 colorIndex);
@@ -95,20 +103,42 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     /**
      * @dev Constructor.
      */
-    constructor(IERC20 _usdc, address _paymentRecipient) ERC721("Stuff", "Stuff") {
-        if (address(_usdc) == address(0) || _paymentRecipient == address(0)) revert InvalidPaymentConfig();
+    constructor(uint256 _stuffId, StuffCollection memory _stuffCollection)
+        ERC721(
+            string(abi.encodePacked("stuff", Strings.toString(_stuffId))),
+            string(abi.encodePacked("STUFF", Strings.toString(_stuffId)))
+        )
+    {
+        if (
+            bytes(_stuffCollection.sku).length == 0 || address(_stuffCollection.paymentToken) == address(0)
+                || _stuffCollection.paymentRecipient == address(0) || _stuffCollection.maxSupply <= 0
+                || _stuffCollection.mintPriceToken <= 0
+        ) {
+            revert InvalidConfig();
+        }
 
-        USDC = _usdc;
-        PAYMENT_RECIPIENT = _paymentRecipient;
+        if (_stuffCollection.palette.length == 0 || _stuffCollection.palette.length > uint256(type(uint8).max) + 1) {
+            revert InvalidPaletteLength(_stuffCollection.palette.length);
+        }
+
+        STUFF_ID = _stuffId;
+
+        SKU = _stuffCollection.sku;
+        PALETTE = _stuffCollection.palette;
+
+        PAYMENT_TOKEN = _stuffCollection.paymentToken;
+        PAYMENT_RECIPIENT = _stuffCollection.paymentRecipient;
+        MAX_SUPPLY = _stuffCollection.maxSupply;
+        MINT_PRICE_TOKEN = _stuffCollection.mintPriceToken;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * @dev
+     * @dev mint.
      */
-    function mint(address _to, StuffParams calldata _params) external returns (uint256 tokenId) {
+    function mint(address _to, StuffMintParams calldata _params) external returns (uint256 tokenId) {
         if (tokenIdsIndex >= MAX_SUPPLY) revert MaxSupplyReached();
 
         tokenId = tokenIdsIndex++;
@@ -124,7 +154,7 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
 
         _setCanvas(tokenId, _params.canvas);
 
-        USDC.safeTransferFrom(msg.sender, PAYMENT_RECIPIENT, MINT_PRICE_USDC);
+        PAYMENT_TOKEN.safeTransferFrom(msg.sender, PAYMENT_RECIPIENT, MINT_PRICE_TOKEN);
 
         _safeMint(_to, tokenId);
 
@@ -132,47 +162,37 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     }
 
     /**
-     * @dev
+     * @dev getCollection.
      */
-    function getStuff(uint256 _tokenId) external view returns (Stuff memory data) {
+    function getCollection() public view returns (StuffCollection memory collection) {
+        collection = StuffCollection({
+            sku: SKU,
+            palette: PALETTE,
+            paymentToken: PAYMENT_TOKEN,
+            paymentRecipient: PAYMENT_RECIPIENT,
+            maxSupply: MAX_SUPPLY,
+            mintPriceToken: MINT_PRICE_TOKEN
+        });
+    }
+
+    /**
+     * @dev getStuff.
+     */
+    function getStuff(uint256 _tokenId) external view returns (Stuff memory stuff) {
         _requireOwned(_tokenId);
 
-        data = _stuffs[_tokenId];
+        stuff = _stuffs[_tokenId];
     }
 
     /**
-     * @dev
-     */
-    function getPalette() public pure returns (Oklch[PALETTE_SIZE] memory palette) {
-        palette = [
-            Oklch({lightness: 9800, chroma: 100, hue: 95}),
-            Oklch({lightness: 2000, chroma: 200, hue: 260}),
-            Oklch({lightness: 6200, chroma: 2100, hue: 28}),
-            Oklch({lightness: 7400, chroma: 1800, hue: 55}),
-            Oklch({lightness: 8400, chroma: 1600, hue: 95}),
-            Oklch({lightness: 7800, chroma: 1800, hue: 145}),
-            Oklch({lightness: 7000, chroma: 1600, hue: 185}),
-            Oklch({lightness: 6400, chroma: 2000, hue: 245}),
-            Oklch({lightness: 5800, chroma: 2300, hue: 285}),
-            Oklch({lightness: 6800, chroma: 2000, hue: 325}),
-            Oklch({lightness: 8600, chroma: 800, hue: 25}),
-            Oklch({lightness: 7400, chroma: 600, hue: 75}),
-            Oklch({lightness: 5800, chroma: 500, hue: 150}),
-            Oklch({lightness: 4800, chroma: 500, hue: 225}),
-            Oklch({lightness: 3500, chroma: 300, hue: 260}),
-            Oklch({lightness: 800, chroma: 100, hue: 260})
-        ];
-    }
-
-    /**
-     * @dev
+     * @dev _setCanvas.
      */
     function _setCanvas(uint256 _tokenId, bytes calldata _canvas) internal {
         if (_canvas.length != CANVAS_SIZE) revert InvalidCanvasLength(_canvas.length);
 
         for (uint256 i = 0; i < CANVAS_SIZE; i++) {
             uint8 colorIndex = uint8(_canvas[i]);
-            if (colorIndex >= PALETTE_SIZE) revert PaletteIndexOutOfRange(colorIndex);
+            if (colorIndex >= PALETTE.length) revert PaletteIndexOutOfRange(colorIndex);
         }
 
         _stuffs[_tokenId].canvas = _canvas;

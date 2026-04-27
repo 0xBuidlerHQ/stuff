@@ -3,11 +3,6 @@ export type Address = string;
 export type Bytes = string;
 
 export namespace StuffERC721 {
-	export type Oklch = {
-		lightness: number;
-		chroma: number;
-		hue: number;
-	};
 	export type Stuff = {
 		authorName: string;
 		authorAddress: Address;
@@ -16,7 +11,17 @@ export namespace StuffERC721 {
 		creationDate: bigint;
 		canvas: Bytes;
 	};
-	export type StuffParams = {
+	export type StuffCollection = {
+		name: string;
+		symbol: string;
+		sku: string;
+		palette: Array<string>;
+		paymentToken: Address;
+		paymentRecipient: Address;
+		maxSupply: bigint;
+		mintPriceToken: bigint;
+	};
+	export type StuffMintParams = {
 		authorName: string;
 		title: string;
 		description: string;
