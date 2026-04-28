@@ -54,17 +54,18 @@ contract Deploy is Actors, Packages, StdCheats {
         StuffFactory stuffFactory = new StuffFactory{salt: SALT}();
         StuffERC721 stuffERC721 = stuffFactory.createStuffERC721(
             StuffERC721.StuffCollection({
-                name: "Genesis",
-                symbol: "STUFF#000",
-                //
-                sku: "stuff-000",
+                sku: "stuff-00000",
+                category: "garment",
+                metadataURI: "https://example.com/stuff-00000.json",
                 palette: _getPalette(),
+                options: _getOptions(),
                 //
                 paymentToken: usdc,
                 paymentRecipient: deployer.addr,
                 maxSupply: STUFF_MAX_SUPPLY,
                 mintPriceToken: STUFF_MINT_PRICE_USDC
-            })
+            }),
+            deployer.addr
         );
 
         stop();
@@ -104,5 +105,18 @@ contract Deploy is Actors, Packages, StdCheats {
         palette[13] = "#d4d4d4";
         palette[14] = "#0f172a";
         palette[15] = "#f8fafc";
+    }
+
+    function _getOptions() internal pure returns (string[][] memory options) {
+        options = new string[][](1);
+
+        options[0] = new string[](7);
+        options[0][0] = "size";
+        options[0][1] = "XS";
+        options[0][2] = "S";
+        options[0][3] = "M";
+        options[0][4] = "L";
+        options[0][5] = "XL";
+        options[0][6] = "XXL";
     }
 }

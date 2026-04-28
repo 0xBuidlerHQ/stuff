@@ -62,7 +62,7 @@ const ButtonPrimary = (props: ButtonBaseProps) => {
 	return (
 		<Button
 			className={cn(
-				"rounded-2xl bg-foreground px-4 py-3 text-background transition-opacity hover:opacity-90",
+				"bg-foreground px-4 py-3 text-background transition-opacity hover:opacity-90",
 				props.disabled && "opacity-50",
 				className,
 			)}

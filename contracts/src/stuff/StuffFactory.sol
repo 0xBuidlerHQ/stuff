@@ -2,7 +2,6 @@
 pragma solidity ^0.8.28;
 
 import {StuffERC721} from "@stuff/StuffERC721.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * @dev Factory for StuffERC721 collections.
@@ -26,13 +25,13 @@ contract StuffFactory {
     /**
      * @dev
      */
-    function createStuffERC721(StuffERC721.StuffCollection calldata _stuffCollection)
+    function createStuffERC721(StuffERC721.StuffCollection calldata _stuffCollection, address _owner)
         external
         returns (StuffERC721 stuff)
     {
         uint256 stuffId = stuffIdsIndex++;
 
-        stuff = new StuffERC721({_stuffId: stuffId, _stuffCollection: _stuffCollection});
+        stuff = new StuffERC721({_stuffId: stuffId, _stuffCollection: _stuffCollection, _owner: _owner});
 
         stuffs[stuffId] = stuff;
 

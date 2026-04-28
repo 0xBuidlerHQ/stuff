@@ -1,7 +1,7 @@
 "use client";
 
-import { Redo2, Trash2, Undo2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Redo2, RotateCcw, Undo2 } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/utils";
 
 const EMPTY_COLOR = "transparent";
@@ -20,7 +20,7 @@ type PalettePickerProps = {
 
 type PixelCanvasProps = {
 	size: number;
-	cellSize: number;
+	canvasSize: number;
 	brushSize: number;
 	pixels: readonly string[];
 	onBeginStroke: () => void;
@@ -32,6 +32,16 @@ type BrushSizeControlProps = {
 	maxBrushSize: number;
 	onBrushSizeChange: (brushSize: number) => void;
 };
+
+const COMPANY_LOGO = [
+	[0, 0, 0, 0, 0, 0, 0],
+	[0, 1, 0, 1, 0, 1, 0],
+	[0, 0, 1, 1, 1, 0, 0],
+	[0, 1, 1, 1, 1, 1, 0],
+	[0, 0, 1, 1, 1, 0, 0],
+	[0, 1, 0, 1, 0, 1, 0],
+	[0, 0, 0, 0, 0, 0, 0],
+] as const;
 
 const BrushSizeControl = ({
 	brushSize,
@@ -88,6 +98,39 @@ const PalettePicker = ({ palettes, selectedColor, onSelectColor }: PalettePicker
 	);
 };
 
+const getDefaultPixels = (size: number, firstColor: string, secondColor: string) => {
+	const logoCellSize = Math.max(1, Math.floor(size / COMPANY_LOGO.length));
+	const pixels = Array(size * size).fill(firstColor);
+
+	for (let logoRow = 0; logoRow < COMPANY_LOGO.length; logoRow++) {
+		for (let logoColumn = 0; logoColumn < COMPANY_LOGO[logoRow].length; logoColumn++) {
+			const color = COMPANY_LOGO[logoRow][logoColumn] === 1 ? secondColor : firstColor;
+			const startRow = logoRow * logoCellSize;
+			const startColumn = logoColumn * logoCellSize;
+
+			for (let row = startRow; row < Math.min(size, startRow + logoCellSize); row++) {
+				for (
+					let column = startColumn;
+					column < Math.min(size, startColumn + logoCellSize);
+					column++
+				) {
+					pixels[row * size + column] = color;
+				}
+			}
+		}
+	}
+
+	return pixels;
+};
+
+const arePixelsEqual = (left: readonly string[], right: readonly string[]) => {
+	if (left.length !== right.length) {
+		return false;
+	}
+
+	return left.every((color, index) => color === right[index]);
+};
+
 const getBrushPixelIndexes = (index: number, size: number, brushSize: number) => {
 	const indexes: number[] = [];
 	const centerRow = Math.floor(index / size);
@@ -111,13 +154,9 @@ const getBrushPixelIndexes = (index: number, size: number, brushSize: number) =>
 	return indexes;
 };
 
-const isBlankCanvas = (pixels: readonly string[]) => {
-	return pixels.every((color) => color === EMPTY_COLOR);
-};
-
 const PixelCanvas = ({
 	size,
-	cellSize,
+	canvasSize,
 	brushSize,
 	pixels,
 	onBeginStroke,
@@ -125,6 +164,7 @@ const PixelCanvas = ({
 }: PixelCanvasProps) => {
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+	const cellSize = Math.max(1, Math.floor(canvasSize / size));
 
 	const hoveredBrushIndexes = useMemo(() => {
 		if (hoveredIndex === null) {
@@ -178,8 +218,10 @@ const PixelCanvas = ({
 		<div
 			className="grid aspect-square touch-none overflow-hidden border border-border bg-background"
 			style={{
-				gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
-				width: `min(100%, ${size * cellSize}px, calc(100dvh - 14rem))`,
+				gridTemplateColumns: `repeat(${size}, ${cellSize}px)`,
+				gridTemplateRows: `repeat(${size}, ${cellSize}px)`,
+				width: `${canvasSize}px`,
+				height: `${canvasSize}px`,
 			}}
 			onPointerLeave={clearHoverPreview}
 			onPointerUp={stopDrawing}
@@ -191,7 +233,7 @@ const PixelCanvas = ({
 					type="button"
 					aria-label={`Pixel ${index + 1}`}
 					className={cn(
-						"aspect-square border-r border-b border-border/50 transition-colors",
+						"block h-full w-full border-r border-b border-border/50 transition-colors",
 						hoveredBrushIndexes.has(index) && "ring-1 ring-foreground ring-inset",
 					)}
 					style={{ backgroundColor: color }}
@@ -204,28 +246,64 @@ const PixelCanvas = ({
 };
 
 const Grid = ({ size, cellSize, palettes }: GridProps) => {
-	const cellCount = size * size;
 	const resolvedCellSize = Math.max(1, cellSize);
 	const maxBrushSize = Math.max(1, Math.min(size, 8));
 	const [selectedColor, setSelectedColor] = useState<string>(palettes[0] ?? EMPTY_COLOR);
-	const [pixels, setPixels] = useState<string[]>(() => Array(cellCount).fill(EMPTY_COLOR));
+	const firstColor = palettes[0] ?? EMPTY_COLOR;
+	const secondColor = palettes[1] ?? firstColor;
+	const defaultPixels = useMemo(
+		() => getDefaultPixels(size, firstColor, secondColor),
+		[size, firstColor, secondColor],
+	);
+	const [pixels, setPixels] = useState<string[]>(() =>
+		getDefaultPixels(size, firstColor, secondColor),
+	);
 	const [history, setHistory] = useState<string[][]>([]);
 	const [redoHistory, setRedoHistory] = useState<string[][]>([]);
 	const [brushSize, setBrushSize] = useState(1);
 	const strokeHasHistoryRef = useRef(false);
+	const defaultPixelsRef = useRef(defaultPixels);
+	const canvasWrapperRef = useRef<HTMLDivElement | null>(null);
+	const [canvasSize, setCanvasSize] = useState(size * resolvedCellSize);
 
 	useEffect(() => {
-		setPixels(Array(cellCount).fill(EMPTY_COLOR));
+		defaultPixelsRef.current = defaultPixels;
+		setPixels(defaultPixels);
 		setHistory([]);
 		setRedoHistory([]);
 		strokeHasHistoryRef.current = false;
-	}, [cellCount]);
+	}, [defaultPixels]);
 
 	useEffect(() => {
 		if (!palettes.includes(selectedColor)) {
 			setSelectedColor(palettes[0] ?? EMPTY_COLOR);
 		}
 	}, [palettes, selectedColor]);
+
+	useLayoutEffect(() => {
+		const measureCanvasSize = () => {
+			const availableWidth = canvasWrapperRef.current?.clientWidth ?? size * resolvedCellSize;
+			const availableHeight = window.innerHeight - 14 * 16;
+			const maxCanvasSide = Math.min(availableWidth, availableHeight, size * resolvedCellSize);
+			const nextCanvasSize = Math.max(size, Math.floor(maxCanvasSide / size) * size);
+
+			setCanvasSize(nextCanvasSize);
+		};
+
+		measureCanvasSize();
+
+		const resizeObserver = new ResizeObserver(measureCanvasSize);
+		if (canvasWrapperRef.current) {
+			resizeObserver.observe(canvasWrapperRef.current);
+		}
+
+		window.addEventListener("resize", measureCanvasSize);
+
+		return () => {
+			resizeObserver.disconnect();
+			window.removeEventListener("resize", measureCanvasSize);
+		};
+	}, [resolvedCellSize, size]);
 
 	const canPaint = useMemo(() => size > 0 && palettes.length > 0, [palettes.length, size]);
 
@@ -316,21 +394,23 @@ const Grid = ({ size, cellSize, palettes }: GridProps) => {
 			return;
 		}
 
-		if (isBlankCanvas(pixels)) {
+		if (arePixelsEqual(pixels, defaultPixelsRef.current)) {
 			return;
 		}
 
 		setHistory((currentHistory) => [...currentHistory, pixels]);
 		setRedoHistory([]);
-		setPixels(Array(cellCount).fill(EMPTY_COLOR));
+		const nextPixels = getDefaultPixels(size, firstColor, secondColor);
+		defaultPixelsRef.current = nextPixels;
+		setPixels(nextPixels);
 	};
 
 	return (
 		<div className="h-full">
-			<div className="flex items-center justify-center p-4">
+			<div ref={canvasWrapperRef} className="flex items-center justify-center p-4">
 				<PixelCanvas
 					size={size}
-					cellSize={resolvedCellSize}
+					canvasSize={canvasSize}
 					brushSize={brushSize}
 					pixels={pixels}
 					onBeginStroke={beginStroke}
@@ -367,12 +447,12 @@ const Grid = ({ size, cellSize, palettes }: GridProps) => {
 						</button>
 						<button
 							type="button"
-							aria-label="Clear"
+							aria-label="Reset to default"
 							className="flex h-8 w-8 items-center justify-center rounded-sm border border-border transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
 							onClick={clearPixels}
-							disabled={!canPaint || isBlankCanvas(pixels)}
+							disabled={!canPaint || arePixelsEqual(pixels, defaultPixelsRef.current)}
 						>
-							<Trash2 className="h-4 w-4" />
+							<RotateCcw className="h-4 w-4" />
 						</button>
 					</div>
 				</div>

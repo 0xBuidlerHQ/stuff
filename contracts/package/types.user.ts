@@ -10,12 +10,14 @@ export namespace StuffERC721 {
 		description: string;
 		creationDate: bigint;
 		canvas: Bytes;
+		options: Array<Array<string>>;
 	};
 	export type StuffCollection = {
-		name: string;
-		symbol: string;
 		sku: string;
+		category: string;
+		metadataURI: string;
 		palette: Array<string>;
+		options: Array<Array<string>>;
 		paymentToken: Address;
 		paymentRecipient: Address;
 		maxSupply: bigint;
@@ -26,5 +28,6 @@ export namespace StuffERC721 {
 		title: string;
 		description: string;
 		canvas: Bytes;
+		options: Array<Array<string>>;
 	};
 }

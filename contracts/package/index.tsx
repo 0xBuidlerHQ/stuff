@@ -1451,6 +1451,63 @@ export const iMulticall3Abi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Ownable
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const ownableAbi = [
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SafeCast
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1526,7 +1583,7 @@ export const stringsAbi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x2D9017b43264D8724D362441ECAB466539D0B393)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0xf6971DFd5E472957eeD5d7f9C251975722852D9A)
  * -
  */
 export const stuffErc721Abi = [
@@ -1539,10 +1596,11 @@ export const stuffErc721Abi = [
         internalType: 'struct StuffERC721.StuffCollection',
         type: 'tuple',
         components: [
-          { name: 'name', internalType: 'string', type: 'string' },
-          { name: 'symbol', internalType: 'string', type: 'string' },
           { name: 'sku', internalType: 'string', type: 'string' },
+          { name: 'category', internalType: 'string', type: 'string' },
+          { name: 'metadataURI', internalType: 'string', type: 'string' },
           { name: 'palette', internalType: 'string[]', type: 'string[]' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
           {
             name: 'paymentToken',
             internalType: 'contract IERC20',
@@ -1557,6 +1615,7 @@ export const stuffErc721Abi = [
           { name: 'mintPriceToken', internalType: 'uint256', type: 'uint256' },
         ],
       },
+      { name: '_owner', internalType: 'address', type: 'address' },
     ],
     stateMutability: 'nonpayable',
   },
@@ -1622,10 +1681,11 @@ export const stuffErc721Abi = [
         internalType: 'struct StuffERC721.StuffCollection',
         type: 'tuple',
         components: [
-          { name: 'name', internalType: 'string', type: 'string' },
-          { name: 'symbol', internalType: 'string', type: 'string' },
           { name: 'sku', internalType: 'string', type: 'string' },
+          { name: 'category', internalType: 'string', type: 'string' },
+          { name: 'metadataURI', internalType: 'string', type: 'string' },
           { name: 'palette', internalType: 'string[]', type: 'string[]' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
           {
             name: 'paymentToken',
             internalType: 'contract IERC20',
@@ -1659,6 +1719,7 @@ export const stuffErc721Abi = [
           { name: 'description', internalType: 'string', type: 'string' },
           { name: 'creationDate', internalType: 'uint256', type: 'uint256' },
           { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
         ],
       },
     ],
@@ -1687,6 +1748,7 @@ export const stuffErc721Abi = [
           { name: 'title', internalType: 'string', type: 'string' },
           { name: 'description', internalType: 'string', type: 'string' },
           { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
         ],
       },
     ],
@@ -1703,10 +1765,24 @@ export const stuffErc721Abi = [
   },
   {
     type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
     name: 'ownerOf',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -1805,6 +1881,20 @@ export const stuffErc721Abi = [
     stateMutability: 'nonpayable',
   },
   {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'metadataURI_', internalType: 'string', type: 'string' }],
+    name: 'updateMetadataURI',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
     type: 'event',
     anonymous: false,
     inputs: [
@@ -1848,6 +1938,38 @@ export const stuffErc721Abi = [
       { name: 'approved', internalType: 'bool', type: 'bool', indexed: false },
     ],
     name: 'ApprovalForAll',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'metadataURI',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+    ],
+    name: 'MetadataURIUpdated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
   },
   {
     type: 'event',
@@ -1953,10 +2075,49 @@ export const stuffErc721Abi = [
   { type: 'error', inputs: [], name: 'InvalidConfig' },
   {
     type: 'error',
+    inputs: [
+      { name: 'optionIndex', internalType: 'uint256', type: 'uint256' },
+      { name: 'length', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'InvalidOptionLength',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'optionIndex', internalType: 'uint256', type: 'uint256' },
+      { name: 'name', internalType: 'string', type: 'string' },
+    ],
+    name: 'InvalidOptionName',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'optionIndex', internalType: 'uint256', type: 'uint256' },
+      { name: 'value', internalType: 'string', type: 'string' },
+    ],
+    name: 'InvalidOptionValue',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
+    name: 'InvalidOptionsLength',
+  },
+  {
+    type: 'error',
     inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
     name: 'InvalidPaletteLength',
   },
   { type: 'error', inputs: [], name: 'MaxSupplyReached' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
   {
     type: 'error',
     inputs: [{ name: 'colorIndex', internalType: 'uint8', type: 'uint8' }],
@@ -1970,16 +2131,16 @@ export const stuffErc721Abi = [
 ] as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x2D9017b43264D8724D362441ECAB466539D0B393)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0xf6971DFd5E472957eeD5d7f9C251975722852D9A)
  * -
  */
 export const stuffErc721Address = {
-  8453: '0x2D9017b43264D8724D362441ECAB466539D0B393',
+  8453: '0xf6971DFd5E472957eeD5d7f9C251975722852D9A',
   31337: '0xf6B55614076BA5D1C1bc737FEAC29D8c76FE1bb1',
 } as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x2D9017b43264D8724D362441ECAB466539D0B393)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0xf6971DFd5E472957eeD5d7f9C251975722852D9A)
  * -
  */
 export const stuffErc721Config = {
@@ -1992,7 +2153,7 @@ export const stuffErc721Config = {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x3bA596A5307669d67AeF0d4De4679d93e0F91DA0)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x13f4931D96f7CfEfF4e65c0dD6A30873c0848FBA)
  * -
  */
 export const stuffFactoryAbi = [
@@ -2004,10 +2165,11 @@ export const stuffFactoryAbi = [
         internalType: 'struct StuffERC721.StuffCollection',
         type: 'tuple',
         components: [
-          { name: 'name', internalType: 'string', type: 'string' },
-          { name: 'symbol', internalType: 'string', type: 'string' },
           { name: 'sku', internalType: 'string', type: 'string' },
+          { name: 'category', internalType: 'string', type: 'string' },
+          { name: 'metadataURI', internalType: 'string', type: 'string' },
           { name: 'palette', internalType: 'string[]', type: 'string[]' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
           {
             name: 'paymentToken',
             internalType: 'contract IERC20',
@@ -2022,6 +2184,7 @@ export const stuffFactoryAbi = [
           { name: 'mintPriceToken', internalType: 'uint256', type: 'uint256' },
         ],
       },
+      { name: '_owner', internalType: 'address', type: 'address' },
     ],
     name: 'createStuffERC721',
     outputs: [
@@ -2067,16 +2230,16 @@ export const stuffFactoryAbi = [
 ] as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x3bA596A5307669d67AeF0d4De4679d93e0F91DA0)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x13f4931D96f7CfEfF4e65c0dD6A30873c0848FBA)
  * -
  */
 export const stuffFactoryAddress = {
-  8453: '0x3bA596A5307669d67AeF0d4De4679d93e0F91DA0',
+  8453: '0x13f4931D96f7CfEfF4e65c0dD6A30873c0848FBA',
   31337: '0x1C6dDd12225B411f20d6dCAf45113de632166FAd',
 } as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x3bA596A5307669d67AeF0d4De4679d93e0F91DA0)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x13f4931D96f7CfEfF4e65c0dD6A30873c0848FBA)
  * -
  */
 export const stuffFactoryConfig = {

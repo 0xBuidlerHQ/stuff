@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import Img from "@/app/icon.svg";
 import { links } from "@/config/links";
 import { ConnectButton } from "@/features/web3/connectButton";
 import { Box } from "@/primitives/box";
@@ -8,10 +10,10 @@ import { HeaderPrimitive } from "@/primitives/header";
 const Header = () => {
 	return (
 		<HeaderPrimitive>
-			<Box className="flex justify-between">
+			<Box className="flex justify-between py-2">
 				<Box className="flex items-center">
 					<Link className="text-sm font-medium" href={links.home.url}>
-						MONO
+						<Image className="size-10" src={Img} alt="" />
 					</Link>
 
 					<Box className="w-8 flex items-center justify-center">
@@ -31,7 +33,7 @@ const Header = () => {
 	);
 };
 
-const NavigationItems = [links.projects, links.about];
+const NavigationItems = [links.products, links.about];
 
 const Navigation = () => {
 	return (
