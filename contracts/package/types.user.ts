@@ -4,7 +4,7 @@ export type Bytes = string;
 
 export namespace StuffERC721 {
 	export type Stuff = {
-		authorName: string;
+		author: string;
 		authorAddress: Address;
 		title: string;
 		description: string;
@@ -24,7 +24,7 @@ export namespace StuffERC721 {
 		mintPriceToken: bigint;
 	};
 	export type StuffMintParams = {
-		authorName: string;
+		author: string;
 		title: string;
 		description: string;
 		canvas: Bytes;

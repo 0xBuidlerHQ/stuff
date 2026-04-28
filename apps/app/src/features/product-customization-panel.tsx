@@ -3,17 +3,16 @@
 import type { StuffERC721 } from "@0xhq/stuff.contracts/types.user";
 import { useState } from "react";
 import { Grid } from "@/features/grid";
+import { usePreviewStore } from "@/features/store";
 import { Box } from "@/primitives/box";
 import { ButtonPrimary } from "@/primitives/button";
 
 type ProductCustomizationPanelProps = {
-	sku: string;
 	palette: readonly string[];
 	options: StuffERC721.StuffCollection["options"];
 };
 
 const GRID_SIZE = 42;
-const CELL_SIZE = 10;
 
 const getDefaultOptionValues = (options: StuffERC721.StuffCollection["options"]) => {
 	return options.reduce<Record<string, string>>((acc, option) => {
@@ -25,7 +24,7 @@ const getDefaultOptionValues = (options: StuffERC721.StuffCollection["options"])
 	}, {});
 };
 
-const ProductCustomizationPanel = ({ sku, palette, options }: ProductCustomizationPanelProps) => {
+const ProductCustomizationPanel = ({ palette, options }: ProductCustomizationPanelProps) => {
 	const [author, setAuthor] = useState("");
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
@@ -33,11 +32,26 @@ const ProductCustomizationPanel = ({ sku, palette, options }: ProductCustomizati
 		getDefaultOptionValues(options),
 	);
 
+	const previewStore = usePreviewStore();
+
 	return (
 		<Box className="grid gap-6">
+			<Box className="grid gap-3 border border-border bg-background p-4">
+				<div className="flex items-baseline justify-between gap-4">
+					<div>
+						<div className="text-sm">Canvas</div>
+						<div className="text-xs text-muted-foreground">
+							Use the palette and brush controls below.
+						</div>
+					</div>
+				</div>
+
+				<Grid size={GRID_SIZE} palettes={palette} />
+			</Box>
+
 			<Box className="grid gap-4 border border-border bg-background p-4">
 				<div className="grid gap-2">
-					<div className="text-sm text-muted-foreground">Author</div>
+					<div className="text-sm">Author</div>
 					<input
 						value={author}
 						onChange={(event) => setAuthor(event.target.value)}
@@ -47,7 +61,7 @@ const ProductCustomizationPanel = ({ sku, palette, options }: ProductCustomizati
 				</div>
 
 				<div className="grid gap-2">
-					<div className="text-sm text-muted-foreground">Title</div>
+					<div className="text-sm">Title</div>
 					<input
 						value={title}
 						onChange={(event) => setTitle(event.target.value)}
@@ -57,7 +71,7 @@ const ProductCustomizationPanel = ({ sku, palette, options }: ProductCustomizati
 				</div>
 
 				<div className="grid gap-2">
-					<div className="text-sm text-muted-foreground">Description</div>
+					<div className="text-sm">Description</div>
 					<textarea
 						value={description}
 						onChange={(event) => setDescription(event.target.value)}
@@ -76,7 +90,7 @@ const ProductCustomizationPanel = ({ sku, palette, options }: ProductCustomizati
 
 						return (
 							<div key={name} className="grid gap-2">
-								<div className="text-sm">{name}</div>
+								<div className="text-sm capitalize">{name}</div>
 								<div className="flex flex-wrap gap-2">
 									{values.map((value) => {
 										const isSelected = selectedValue === value;
@@ -109,19 +123,7 @@ const ProductCustomizationPanel = ({ sku, palette, options }: ProductCustomizati
 				</div>
 			</Box>
 
-			<Box className="grid gap-3 border border-border bg-background p-4">
-				<div className="flex items-baseline justify-between gap-4">
-					<div>
-						<div className="text-sm text-muted-foreground">Canvas</div>
-						<div className="text-xs text-muted-foreground">
-							Use the palette and brush controls below.
-						</div>
-					</div>
-				</div>
-				<Grid size={GRID_SIZE} cellSize={CELL_SIZE} palettes={palette} />
-			</Box>
-
-			<ButtonPrimary disabled className="w-full justify-center">
+			<ButtonPrimary onClick={previewStore.openPreviewDrawer} className="w-full justify-center">
 				Review
 			</ButtonPrimary>
 		</Box>

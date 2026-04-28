@@ -89,15 +89,15 @@ contract Deploy is Actors, Packages, StdCheats {
     function _getPalette() internal pure returns (string[] memory palette) {
         palette = new string[](16);
 
-        palette[0] = "#111111";
-        palette[1] = "#ffffff";
-        palette[2] = "#ef4444";
-        palette[3] = "#f97316";
-        palette[4] = "#facc15";
+        palette[0] = "#2563eb";
+        palette[1] = "#facc15";
+        palette[2] = "#111111";
+        palette[3] = "#ffffff";
+        palette[4] = "#ef4444";
         palette[5] = "#22c55e";
         palette[6] = "#14b8a6";
         palette[7] = "#38bdf8";
-        palette[8] = "#2563eb";
+        palette[8] = "#f97316";
         palette[9] = "#8b5cf6";
         palette[10] = "#ec4899";
         palette[11] = "#a16207";

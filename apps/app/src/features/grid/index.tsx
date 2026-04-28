@@ -1,14 +1,15 @@
 "use client";
 
 import { Redo2, RotateCcw, Undo2 } from "lucide-react";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Box } from "@/primitives/box";
+import { Button } from "@/primitives/button";
 import { cn } from "@/utils";
 
 const EMPTY_COLOR = "transparent";
 
 type GridProps = {
 	size: number;
-	cellSize: number;
 	palettes: readonly string[];
 };
 
@@ -20,7 +21,6 @@ type PalettePickerProps = {
 
 type PixelCanvasProps = {
 	size: number;
-	canvasSize: number;
 	brushSize: number;
 	pixels: readonly string[];
 	onBeginStroke: () => void;
@@ -50,32 +50,32 @@ const BrushSizeControl = ({
 }: BrushSizeControlProps) => {
 	return (
 		<div className="flex items-center gap-2">
-			<button
-				type="button"
+			<Button
 				aria-label="Decrease brush size"
-				className="flex h-8 w-8 items-center justify-center rounded-sm border border-border text-sm transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+				className="flex h-8 w-8 items-center justify-center border border-border text-sm transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
 				onClick={() => onBrushSizeChange(Math.max(1, brushSize - 1))}
 				disabled={brushSize <= 1}
 			>
 				-
-			</button>
+			</Button>
+
 			<span className="min-w-8 text-center text-xs tabular-nums">{brushSize}</span>
-			<button
-				type="button"
+
+			<Button
 				aria-label="Increase brush size"
-				className="flex h-8 w-8 items-center justify-center rounded-sm border border-border text-sm transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+				className="flex h-8 w-8 items-center justify-center border border-border text-sm transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
 				onClick={() => onBrushSizeChange(Math.min(maxBrushSize, brushSize + 1))}
 				disabled={brushSize >= maxBrushSize}
 			>
 				+
-			</button>
+			</Button>
 		</div>
 	);
 };
 
 const PalettePicker = ({ palettes, selectedColor, onSelectColor }: PalettePickerProps) => {
 	return (
-		<div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1">
+		<div className="flex items-center py-1 gap-2 px-1 overflow-x-scroll">
 			{palettes.map((color) => {
 				const isSelected = selectedColor === color;
 
@@ -86,8 +86,8 @@ const PalettePicker = ({ palettes, selectedColor, onSelectColor }: PalettePicker
 						aria-label={`Select ${color}`}
 						aria-pressed={isSelected}
 						className={cn(
-							"h-8 w-8 shrink-0 rounded-sm border border-border transition outline-offset-2",
-							isSelected && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
+							"size-4 shrink-0 border border-border transition outline-offset-2",
+							isSelected && "ring-1 ring-foreground ring-offset-1 ring-offset-background",
 						)}
 						style={{ backgroundColor: color }}
 						onClick={() => onSelectColor(color)}
@@ -156,7 +156,6 @@ const getBrushPixelIndexes = (index: number, size: number, brushSize: number) =>
 
 const PixelCanvas = ({
 	size,
-	canvasSize,
 	brushSize,
 	pixels,
 	onBeginStroke,
@@ -164,7 +163,6 @@ const PixelCanvas = ({
 }: PixelCanvasProps) => {
 	const [isDrawing, setIsDrawing] = useState(false);
 	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-	const cellSize = Math.max(1, Math.floor(canvasSize / size));
 
 	const hoveredBrushIndexes = useMemo(() => {
 		if (hoveredIndex === null) {
@@ -216,24 +214,25 @@ const PixelCanvas = ({
 
 	return (
 		<div
-			className="grid aspect-square touch-none overflow-hidden border border-border bg-background"
+			className="grid aspect-square w-full touch-none overflow-hidden border border-muted-foreground bg-background"
 			style={{
-				gridTemplateColumns: `repeat(${size}, ${cellSize}px)`,
-				gridTemplateRows: `repeat(${size}, ${cellSize}px)`,
-				width: `${canvasSize}px`,
-				height: `${canvasSize}px`,
+				gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+				gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,
 			}}
 			onPointerLeave={clearHoverPreview}
 			onPointerUp={stopDrawing}
 			onPointerCancel={stopDrawing}
 		>
 			{pixels.map((color, index) => (
+				// Last row/column keep the outer container border only.
 				<button
 					key={index}
 					type="button"
 					aria-label={`Pixel ${index + 1}`}
 					className={cn(
-						"block h-full w-full border-r border-b border-border/50 transition-colors",
+						"block min-h-0 min-w-0 h-full w-full border-border/50 transition-colors",
+						index % size !== size - 1 && "border-r",
+						index < size * (size - 1) && "border-b",
 						hoveredBrushIndexes.has(index) && "ring-1 ring-foreground ring-inset",
 					)}
 					style={{ backgroundColor: color }}
@@ -245,8 +244,7 @@ const PixelCanvas = ({
 	);
 };
 
-const Grid = ({ size, cellSize, palettes }: GridProps) => {
-	const resolvedCellSize = Math.max(1, cellSize);
+const Grid = ({ size, palettes }: GridProps) => {
 	const maxBrushSize = Math.max(1, Math.min(size, 8));
 	const [selectedColor, setSelectedColor] = useState<string>(palettes[0] ?? EMPTY_COLOR);
 	const firstColor = palettes[0] ?? EMPTY_COLOR;
@@ -263,8 +261,6 @@ const Grid = ({ size, cellSize, palettes }: GridProps) => {
 	const [brushSize, setBrushSize] = useState(1);
 	const strokeHasHistoryRef = useRef(false);
 	const defaultPixelsRef = useRef(defaultPixels);
-	const canvasWrapperRef = useRef<HTMLDivElement | null>(null);
-	const [canvasSize, setCanvasSize] = useState(size * resolvedCellSize);
 
 	useEffect(() => {
 		defaultPixelsRef.current = defaultPixels;
@@ -279,31 +275,6 @@ const Grid = ({ size, cellSize, palettes }: GridProps) => {
 			setSelectedColor(palettes[0] ?? EMPTY_COLOR);
 		}
 	}, [palettes, selectedColor]);
-
-	useLayoutEffect(() => {
-		const measureCanvasSize = () => {
-			const availableWidth = canvasWrapperRef.current?.clientWidth ?? size * resolvedCellSize;
-			const availableHeight = window.innerHeight - 14 * 16;
-			const maxCanvasSide = Math.min(availableWidth, availableHeight, size * resolvedCellSize);
-			const nextCanvasSize = Math.max(size, Math.floor(maxCanvasSide / size) * size);
-
-			setCanvasSize(nextCanvasSize);
-		};
-
-		measureCanvasSize();
-
-		const resizeObserver = new ResizeObserver(measureCanvasSize);
-		if (canvasWrapperRef.current) {
-			resizeObserver.observe(canvasWrapperRef.current);
-		}
-
-		window.addEventListener("resize", measureCanvasSize);
-
-		return () => {
-			resizeObserver.disconnect();
-			window.removeEventListener("resize", measureCanvasSize);
-		};
-	}, [resolvedCellSize, size]);
 
 	const canPaint = useMemo(() => size > 0 && palettes.length > 0, [palettes.length, size]);
 
@@ -406,11 +377,10 @@ const Grid = ({ size, cellSize, palettes }: GridProps) => {
 	};
 
 	return (
-		<div className="h-full">
-			<div ref={canvasWrapperRef} className="flex items-center justify-center p-4">
+		<div className="h-full overflow-hidden">
+			<div className="flex items-center justify-center p-4">
 				<PixelCanvas
 					size={size}
-					canvasSize={canvasSize}
 					brushSize={brushSize}
 					pixels={pixels}
 					onBeginStroke={beginStroke}
@@ -418,50 +388,51 @@ const Grid = ({ size, cellSize, palettes }: GridProps) => {
 				/>
 			</div>
 
-			<div className="sticky bottom-0 z-10 -mx-(--app-px) flex flex-col gap-3 border-t border-border bg-background/95 px-(--app-px) py-3 backdrop-blur sm:static sm:mx-0 sm:border-t-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
-				<div className="flex items-center justify-between gap-3">
+			<div className="pt-4 flex flex-col gap-2">
+				<Box className="flex items-center justify-center gap-10">
 					<BrushSizeControl
 						brushSize={brushSize}
 						maxBrushSize={maxBrushSize}
 						onBrushSizeChange={setBrushSize}
 					/>
 
-					<div className="flex items-center gap-2">
-						<button
-							type="button"
+					<Box className="flex items-center gap-2">
+						<Button
 							aria-label="Undo"
-							className="flex h-8 w-8 items-center justify-center rounded-sm border border-border transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+							className="flex h-8 w-8 items-center justify-center border border-border transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
 							onClick={undo}
 							disabled={history.length === 0}
 						>
 							<Undo2 className="h-4 w-4" />
-						</button>
-						<button
-							type="button"
+						</Button>
+
+						<Button
 							aria-label="Redo"
-							className="flex h-8 w-8 items-center justify-center rounded-sm border border-border transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+							className="flex h-8 w-8 items-center justify-center border border-border transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
 							onClick={redo}
 							disabled={redoHistory.length === 0}
 						>
 							<Redo2 className="h-4 w-4" />
-						</button>
-						<button
-							type="button"
+						</Button>
+
+						<Button
 							aria-label="Reset to default"
-							className="flex h-8 w-8 items-center justify-center rounded-sm border border-border transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+							className="flex h-8 w-8 items-center justify-center border border-border transition hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
 							onClick={clearPixels}
 							disabled={!canPaint || arePixelsEqual(pixels, defaultPixelsRef.current)}
 						>
 							<RotateCcw className="h-4 w-4" />
-						</button>
-					</div>
-				</div>
+						</Button>
+					</Box>
+				</Box>
 
-				<PalettePicker
-					palettes={palettes}
-					selectedColor={selectedColor}
-					onSelectColor={setSelectedColor}
-				/>
+				<Box className="flex justify-center">
+					<PalettePicker
+						palettes={palettes}
+						selectedColor={selectedColor}
+						onSelectColor={setSelectedColor}
+					/>
+				</Box>
 			</div>
 		</div>
 	);

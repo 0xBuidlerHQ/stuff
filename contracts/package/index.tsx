@@ -1583,7 +1583,7 @@ export const stringsAbi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0xf6971DFd5E472957eeD5d7f9C251975722852D9A)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x176701A02AD3B00a8BF51a066E96252675B00258)
  * -
  */
 export const stuffErc721Abi = [
@@ -1713,7 +1713,7 @@ export const stuffErc721Abi = [
         internalType: 'struct StuffERC721.Stuff',
         type: 'tuple',
         components: [
-          { name: 'authorName', internalType: 'string', type: 'string' },
+          { name: 'author', internalType: 'string', type: 'string' },
           { name: 'authorAddress', internalType: 'address', type: 'address' },
           { name: 'title', internalType: 'string', type: 'string' },
           { name: 'description', internalType: 'string', type: 'string' },
@@ -1744,7 +1744,7 @@ export const stuffErc721Abi = [
         internalType: 'struct StuffERC721.StuffMintParams',
         type: 'tuple',
         components: [
-          { name: 'authorName', internalType: 'string', type: 'string' },
+          { name: 'author', internalType: 'string', type: 'string' },
           { name: 'title', internalType: 'string', type: 'string' },
           { name: 'description', internalType: 'string', type: 'string' },
           { name: 'canvas', internalType: 'bytes', type: 'bytes' },
@@ -2131,16 +2131,16 @@ export const stuffErc721Abi = [
 ] as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0xf6971DFd5E472957eeD5d7f9C251975722852D9A)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x176701A02AD3B00a8BF51a066E96252675B00258)
  * -
  */
 export const stuffErc721Address = {
-  8453: '0xf6971DFd5E472957eeD5d7f9C251975722852D9A',
+  8453: '0x176701A02AD3B00a8BF51a066E96252675B00258',
   31337: '0xf6B55614076BA5D1C1bc737FEAC29D8c76FE1bb1',
 } as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0xf6971DFd5E472957eeD5d7f9C251975722852D9A)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x176701A02AD3B00a8BF51a066E96252675B00258)
  * -
  */
 export const stuffErc721Config = {
@@ -2153,7 +2153,7 @@ export const stuffErc721Config = {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x13f4931D96f7CfEfF4e65c0dD6A30873c0848FBA)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940)
  * -
  */
 export const stuffFactoryAbi = [
@@ -2230,16 +2230,16 @@ export const stuffFactoryAbi = [
 ] as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x13f4931D96f7CfEfF4e65c0dD6A30873c0848FBA)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940)
  * -
  */
 export const stuffFactoryAddress = {
-  8453: '0x13f4931D96f7CfEfF4e65c0dD6A30873c0848FBA',
+  8453: '0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940',
   31337: '0x1C6dDd12225B411f20d6dCAf45113de632166FAd',
 } as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x13f4931D96f7CfEfF4e65c0dD6A30873c0848FBA)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940)
  * -
  */
 export const stuffFactoryConfig = {

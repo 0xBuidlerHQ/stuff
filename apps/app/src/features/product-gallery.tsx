@@ -20,8 +20,8 @@ const ProductGallery = ({ images, sku }: ProductGalleryProps) => {
 	}
 
 	return (
-		<div className="grid gap-4 desktop:grid-cols-[88px_minmax(0,1fr)]">
-			<div className="order-2 grid gap-2 desktop:order-1">
+		<div className="grid h-full min-h-0 gap-4 desktop:grid-cols-[88px_minmax(0,1fr)]">
+			<div className="order-2 flex gap-2 overflow-x-auto pb-2 desktop:order-1 desktop:grid desktop:auto-rows-min desktop:content-start desktop:justify-items-start desktop:gap-2 desktop:self-start desktop:overflow-y-auto desktop:pb-0">
 				{images.map((image, index) => {
 					const isActive = index === activeIndex;
 
@@ -30,7 +30,8 @@ const ProductGallery = ({ images, sku }: ProductGalleryProps) => {
 							key={`${sku}-thumb-${index}`}
 							type="button"
 							className={[
-								"overflow-hidden border bg-background transition",
+								"relative shrink-0 overflow-hidden border bg-background transition",
+								"aspect-square size-16 desktop:size-22",
 								isActive ? "border-foreground" : "border-border hover:border-foreground/60",
 							].join(" ")}
 							onClick={() => setSelectedIndex(index)}
@@ -39,16 +40,16 @@ const ProductGallery = ({ images, sku }: ProductGalleryProps) => {
 							onMouseEnter={() => setHoveredIndex(index)}
 							onMouseLeave={() => setHoveredIndex(null)}
 						>
-							<Image className="aspect-square w-full object-cover" src={image} alt={sku} />
+							<Image fill className="object-cover" src={image} alt={sku} sizes="88px" />
 						</button>
 					);
 				})}
 			</div>
 
-			<div className="order-1 flex min-h-[360px] items-center justify-center overflow-hidden border border-border bg-background p-4 desktop:order-2">
+			<div className="order-1 flex min-h-0 items-center justify-center overflow-hidden border border-border bg-background p-4 desktop:order-2">
 				{activeImage ? (
 					<Image
-						className="h-full w-full max-h-[72vh] object-contain"
+						className="h-full w-full max-h-full object-contain"
 						src={activeImage}
 						alt={sku}
 						priority
