@@ -3,7 +3,7 @@ import "./system.css";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { cookieToInitialState } from "wagmi";
-import { geistSans, interSans, tronicaMono } from "@/config/fonts";
+import { geistSans, interSans, tronicaMono, unbounded } from "@/config/fonts";
 import { Footer } from "@/layouts/footer";
 import { Globals } from "@/layouts/globals";
 import { Header } from "@/layouts/header";
@@ -26,7 +26,13 @@ export default async function RootLayout({
 	return (
 		<html
 			lang="en"
-			className={cn("antialiased", tronicaMono.variable, geistSans.variable, interSans.variable)}
+			className={cn(
+				"antialiased",
+				tronicaMono.variable,
+				geistSans.variable,
+				interSans.variable,
+				unbounded.variable,
+			)}
 		>
 			<body className="grow flex flex-col min-h-dvh font-tronica-mono">
 				<Providers initialState={initialState}>

@@ -1,8 +1,10 @@
 import type { StuffERC721 } from "@0xhq/stuff.contracts/types.user";
+import type { Address } from "viem";
 import { create } from "zustand";
 
 type ProductConfiguration = {
 	sku: string;
+	stuffAddress: Address;
 	collection: StuffERC721.StuffCollection;
 	author: string;
 	title: string;

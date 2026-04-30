@@ -1,9 +1,10 @@
 import { Beaut } from "@0xhq/beaut";
+import Image from "next/image";
+import Img from "@/app/icon.svg";
 import { getFactoryProjects } from "@/features/product-catalog";
 import { ProductConfigurator } from "@/features/product-configurator";
 import { ProductGallery } from "@/features/product-detail";
 import { Box } from "@/primitives/box";
-import { Button } from "@/primitives/button";
 import { Container } from "@/primitives/container";
 
 export const dynamicParams = false;
@@ -30,14 +31,7 @@ const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
 							<h1 className="text-sm text-muted-foreground">/{projectCollection.category}</h1>
 							<Box className="flex items-center justify-between gap-4">
 								<Box className="flex items-center gap-2">
-									<h1 className="text-2xl">{projectCollection.sku}</h1>
-
-									<Button
-										href={`/products/${projectCollection.sku}/wall`}
-										className="hover:bg-red-500 hover:text-background transition-all"
-									>
-										<h1 className="text-xs px-1">{"->"} Visit The Wall</h1>
-									</Button>
+									<h1 className="text-5xl">{projectCollection.sku}</h1>
 								</Box>
 
 								<Box className="">
@@ -59,8 +53,11 @@ const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
 				<div className="min-w-0 desktop:pr-2 bg-muted p-4">
 					<Box className="grid gap-6">
-						<Box className="flex flex-col gap-1">
-							<h1 className="text-2xl">Customization</h1>
+						<Box className="flex flex-col gap-4">
+							<Box className="flex items-center gap-2">
+								<Image src={Img} alt="" className="size-6" priority />
+								<h1 className="text-lg font-unbounded uppercase">Customization</h1>
+							</Box>
 							<h1 className="text-xs text-muted-foreground">
 								&nbsp;&nbsp;Refine every detail to reflect your vision. Select finishes, adjust
 								elements, and personalize your piece with care and precision, shaping a creation
@@ -69,7 +66,10 @@ const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
 							</h1>
 						</Box>
 
-						<ProductConfigurator collection={projectCollection} />
+						<ProductConfigurator
+							collection={projectCollection}
+							stuffAddress={project.stuffAddress}
+						/>
 					</Box>
 				</div>
 			</div>

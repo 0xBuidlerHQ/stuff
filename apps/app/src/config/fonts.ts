@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Unbounded } from "next/font/google";
 import localFont from "next/font/local";
 
 const tronicaMono = localFont({
@@ -22,4 +22,9 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
-export { geistMono, geistSans, interSans, tronicaMono };
+const unbounded = Unbounded({
+	variable: "--font-unbounded",
+	subsets: ["latin"],
+});
+
+export { geistMono, geistSans, interSans, tronicaMono, unbounded };

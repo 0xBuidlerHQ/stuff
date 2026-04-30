@@ -16,12 +16,14 @@
 	--tronica-letter-spacing: -0.09em;
 	--geist-letter-spacing: 0em;
 	--inter-letter-spacing: -0.05em;
+	--unbounded-letter-spacing: -0.075em;
 }
 
 @theme inline {
 	--font-tronica-mono: var(--font-tronica-mono);
 	--font-geist: var(--font-geist-sans);
 	--font-inter: var(--font-inter-sans);
+	--font-unbounded: var(--font-unbounded);
 }
 
 @layer base {
@@ -33,5 +35,8 @@
 	}
 	.font-inter {
 		letter-spacing: var(--inter-letter-spacing);
+	}
+	.font-unbounded {
+		letter-spacing: var(--unbounded-letter-spacing);
 	}
 }

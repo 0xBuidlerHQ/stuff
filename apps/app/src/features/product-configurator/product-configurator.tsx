@@ -2,6 +2,7 @@
 
 import type { StuffERC721 } from "@0xhq/stuff.contracts/types.user";
 import { useEffect, useMemo } from "react";
+import type { Address } from "viem";
 import { useProductCheckoutStore } from "@/features/product-checkout";
 import { Box } from "@/primitives/box";
 import { ButtonPrimary } from "@/primitives/button";
@@ -10,11 +11,12 @@ import { type ProductConfiguration, useProductConfiguratorStore } from "./store"
 
 type ProductConfiguratorProps = {
 	collection: StuffERC721.StuffCollection;
+	stuffAddress: Address;
 };
 
 const GRID_SIZE = 42;
 
-const ProductConfigurator = ({ collection }: ProductConfiguratorProps) => {
+const ProductConfigurator = ({ collection, stuffAddress }: ProductConfiguratorProps) => {
 	const { options, palette, sku } = collection;
 	const openCheckoutDrawer = useProductCheckoutStore((state) => state.openCheckoutDrawer);
 	const storedConfiguration = useProductConfiguratorStore(
@@ -40,9 +42,10 @@ const ProductConfigurator = ({ collection }: ProductConfiguratorProps) => {
 			selectedOptions: {},
 			collection,
 			sku,
+			stuffAddress,
 			title: "",
 		}),
-		[collection, palette, sku],
+		[collection, palette, sku, stuffAddress],
 	);
 	const configuration = storedConfiguration ?? defaultConfiguration;
 	const requiredOptionNames = useMemo(() => options.map(([name]) => name), [options]);
@@ -72,10 +75,11 @@ const ProductConfigurator = ({ collection }: ProductConfiguratorProps) => {
 		<Box className="grid gap-6">
 			<Box className="grid gap-3 border border-border bg-background p-4">
 				<div className="flex items-baseline justify-between gap-4">
-					<div>
-						<div className="text-sm">Canvas</div>
+					<div className="flex flex-col gap-1">
+						<div className="text-xs font-unbounded">Canvas</div>
+
 						<div className="text-xs text-muted-foreground">
-							Use the palette and brush controls below.
+							/ Use the palette and brush controls below.
 						</div>
 					</div>
 				</div>
@@ -97,38 +101,55 @@ const ProductConfigurator = ({ collection }: ProductConfiguratorProps) => {
 
 			<Box className="grid gap-4 border border-border bg-background p-4">
 				<div className="grid gap-2">
-					<div className="text-sm">Author</div>
+					<div className="flex flex-col gap-1">
+						<div className="text-xs font-unbounded">Author</div>
+
+						<div className="text-xs text-muted-foreground">/ Tell me who you are.</div>
+					</div>
 					<input
 						value={configuration.author}
 						onChange={(event) => updateConfiguration({ author: event.target.value })}
-						placeholder="Tell me who you are."
+						placeholder="-"
 						className="h-10 w-full  border border-border bg-background px-3 text-sm outline-none transition placeholder:text-muted-foreground focus:border-foreground"
 					/>
 				</div>
 
 				<div className="grid gap-2">
-					<div className="text-sm">Title</div>
+					<div className="flex flex-col gap-1">
+						<div className="text-xs font-unbounded">Title</div>
+
+						<div className="text-xs text-muted-foreground">/ Title your piece.</div>
+					</div>
 					<input
 						value={configuration.title}
 						onChange={(event) => updateConfiguration({ title: event.target.value })}
-						placeholder="Title your piece."
+						placeholder="-"
 						className="h-10 w-full  border border-border bg-background px-3 text-sm outline-none transition placeholder:text-muted-foreground focus:border-foreground"
 					/>
 				</div>
 
 				<div className="grid gap-2">
-					<div className="text-sm">Description</div>
+					<div className="flex flex-col gap-1">
+						<div className="text-xs font-unbounded">Description</div>
+
+						<div className="text-xs text-muted-foreground">/ Describe your piece.</div>
+					</div>
 					<textarea
 						value={configuration.description}
 						onChange={(event) => updateConfiguration({ description: event.target.value })}
-						placeholder="Describe your piece."
+						placeholder="-"
 						className="min-h-28 w-full  border border-border bg-background px-3 py-2 text-sm outline-none transition placeholder:text-muted-foreground focus:border-foreground"
 					/>
 				</div>
 			</Box>
 
-			<Box className="grid gap-3 border border-border bg-background p-4">
-				<div className="text-sm text-muted-foreground">Options</div>
+			<Box className="grid gap-8 border border-border bg-background p-4">
+				<div className="flex flex-col gap-1">
+					<div className="text-xs font-unbounded">Options</div>
+
+					<div className="text-xs text-muted-foreground">/ Choose your options.</div>
+				</div>
+
 				<div className="grid gap-4">
 					{options.map((option) => {
 						const [name, ...values] = option;
@@ -136,7 +157,9 @@ const ProductConfigurator = ({ collection }: ProductConfiguratorProps) => {
 
 						return (
 							<div key={name} className="grid gap-2">
-								<div className="text-sm capitalize">{name}</div>
+								<div className="capitalize text-xs font-unbounded text-muted-foreground">
+									{`///// ${name} /////`}
+								</div>
 								<div className="flex flex-wrap gap-2">
 									{values.map((value) => {
 										const isSelected = selectedValue === value;
