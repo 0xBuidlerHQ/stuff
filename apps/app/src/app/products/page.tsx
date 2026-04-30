@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { links } from "@/config/links";
-import { type FactoryProject, getFactoryProjects } from "@/features/getFactoryProjects";
+import { type FactoryProject, getFactoryProjects } from "@/features/product-catalog";
 import { Box } from "@/primitives/box";
 import { Button } from "@/primitives/button";
 import { Container } from "@/primitives/container";

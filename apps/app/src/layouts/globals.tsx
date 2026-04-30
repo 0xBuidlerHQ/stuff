@@ -1,9 +1,9 @@
-import { PreviewDrawer } from "@/features/previewDrawer";
+import { CheckoutDrawer } from "@/features/product-checkout";
 
 const Globals = () => {
 	return (
 		<div className="z-1000">
-			<PreviewDrawer />
+			<CheckoutDrawer />
 		</div>
 	);
 };

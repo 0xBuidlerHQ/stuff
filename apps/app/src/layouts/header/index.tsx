@@ -14,7 +14,7 @@ const Header = () => {
 			<Box className="flex justify-between py-2">
 				<Box className="flex items-center">
 					<Link className="text-sm font-medium" href={links.home.url}>
-						<Image className="size-10" src={Img} alt="" />
+						<Image priority className="size-10" src={Img} alt="" />
 					</Link>
 
 					<Box className="w-8 flex items-center justify-center">

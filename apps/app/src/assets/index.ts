@@ -8,7 +8,7 @@ type ProductAssets = {
 	information: string[][];
 };
 
-const productAssetsBySku = {
+const productAssetsBySku: Record<string, ProductAssets> = {
 	"stuff-00000": {
 		images: [
 			stuff00000Img,
@@ -28,7 +28,7 @@ const productAssetsBySku = {
 			["80% Cotton"],
 		],
 	},
-} satisfies Record<string, ProductAssets>;
+};
 
 const getProductAssets = (sku: string): ProductAssets | undefined => {
 	return productAssetsBySku[sku];
