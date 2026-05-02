@@ -41,13 +41,13 @@ export default async function RootLayout({
 					<Header />
 
 					<main className="flex grow min-h-0">
-						<div className="grow relative">
-							<Box className="py-10 grid gap-2">
+						<Box className="grow relative">
+							<Box className="py-10">
 								<RouteLabel />
 
 								{children}
 							</Box>
-						</div>
+						</Box>
 					</main>
 
 					<Footer />

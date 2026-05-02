@@ -61,7 +61,7 @@ contract Deploy is Actors, Packages, StdCheats {
          */
         StuffFactory stuffFactory = new StuffFactory{salt: SALT}();
         StuffERC721 stuffERC721 = stuffFactory.createStuffERC721(
-            StuffERC721.StuffCollection({
+            StuffERC721.StuffBlueprint({
                 sku: "stuff-00000",
                 category: "garment",
                 metadataURI: "https://example.com/stuff-00000.json",

@@ -11,7 +11,7 @@ import { HeaderPrimitive } from "@/primitives/header";
 const Header = () => {
 	return (
 		<HeaderPrimitive>
-			<Box className="py-[2px]">
+			<Box className="py-0.5">
 				<WorldClock />
 			</Box>
 
@@ -50,7 +50,7 @@ const Header = () => {
 	);
 };
 
-const NavigationItems = [links.products, links.wall, links.about];
+const NavigationItems = [links.stuffs, links.wall, links.about];
 
 const NavigationItem = (props: (typeof NavigationItems)[number]) => {
 	return (

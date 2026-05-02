@@ -35,12 +35,9 @@ const WallPieceCard = ({ piece, slug }: { piece: WallPiece; slug: string }) => {
 
 const ProductWallSection = ({ collection, pieces, slug }: ProductWallProps) => {
 	return (
-		<Box className="grid gap-8">
+		<Box className="grid gap-4">
 			<Box className="grid gap-2">
-				<Box className="text-4xl">{collection.sku} Wall</Box>
-				<Box className="text-sm text-muted-foreground">
-					All minted pieces for this collection, arranged as a live wall.
-				</Box>
+				<Box className="text-4xl">{collection.sku}</Box>
 			</Box>
 
 			<Box className="grid grid-cols-2 gap-4 desktop:grid-cols-6">

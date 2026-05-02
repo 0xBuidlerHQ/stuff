@@ -1640,8 +1640,8 @@ export const stuffErc721Abi = [
     inputs: [
       { name: '_stuffId', internalType: 'uint256', type: 'uint256' },
       {
-        name: '_stuffCollection',
-        internalType: 'struct StuffERC721.StuffCollection',
+        name: '_stuffBlueprint',
+        internalType: 'struct StuffERC721.StuffBlueprint',
         type: 'tuple',
         components: [
           { name: 'sku', internalType: 'string', type: 'string' },
@@ -1722,12 +1722,34 @@ export const stuffErc721Abi = [
   },
   {
     type: 'function',
-    inputs: [],
-    name: 'getCollection',
+    inputs: [{ name: '_tokenId', internalType: 'uint256', type: 'uint256' }],
+    name: 'getStuff',
     outputs: [
       {
-        name: 'collection',
-        internalType: 'struct StuffERC721.StuffCollection',
+        name: 'stuff',
+        internalType: 'struct StuffERC721.Stuff',
+        type: 'tuple',
+        components: [
+          { name: 'author', internalType: 'string', type: 'string' },
+          { name: 'authorAddress', internalType: 'address', type: 'address' },
+          { name: 'title', internalType: 'string', type: 'string' },
+          { name: 'description', internalType: 'string', type: 'string' },
+          { name: 'creationDate', internalType: 'uint256', type: 'uint256' },
+          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
+        ],
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'getStuffBlueprint',
+    outputs: [
+      {
+        name: 'stuffBlueprint',
+        internalType: 'struct StuffERC721.StuffBlueprint',
         type: 'tuple',
         components: [
           { name: 'sku', internalType: 'string', type: 'string' },
@@ -1747,28 +1769,6 @@ export const stuffErc721Abi = [
           },
           { name: 'maxSupply', internalType: 'uint256', type: 'uint256' },
           { name: 'mintPriceToken', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '_tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'getStuff',
-    outputs: [
-      {
-        name: 'stuff',
-        internalType: 'struct StuffERC721.Stuff',
-        type: 'tuple',
-        components: [
-          { name: 'author', internalType: 'string', type: 'string' },
-          { name: 'authorAddress', internalType: 'address', type: 'address' },
-          { name: 'title', internalType: 'string', type: 'string' },
-          { name: 'description', internalType: 'string', type: 'string' },
-          { name: 'creationDate', internalType: 'uint256', type: 'uint256' },
-          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
-          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
         ],
       },
     ],
@@ -2227,7 +2227,7 @@ export const stuffErc721Abi = [
  */
 export const stuffErc721Address = {
   8453: '0x176701A02AD3B00a8BF51a066E96252675B00258',
-  31337: '0xec82bB27E98B4866883E5DD6D49D576DA3A39051',
+  31337: '0xE9e10cc305f675862298e9684876f7d73f3a81B9',
 } as const
 
 /**
@@ -2252,8 +2252,8 @@ export const stuffFactoryAbi = [
     type: 'function',
     inputs: [
       {
-        name: '_stuffCollection',
-        internalType: 'struct StuffERC721.StuffCollection',
+        name: '_stuffBlueprint',
+        internalType: 'struct StuffERC721.StuffBlueprint',
         type: 'tuple',
         components: [
           { name: 'sku', internalType: 'string', type: 'string' },
@@ -2327,7 +2327,7 @@ export const stuffFactoryAbi = [
  */
 export const stuffFactoryAddress = {
   8453: '0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940',
-  31337: '0x9cC5DbDc603cD1C53a1222f5c6c517Af6Cb57B42',
+  31337: '0x60dcA26eeeEA11aA9a5B053abC75708Af44273a6',
 } as const
 
 /**

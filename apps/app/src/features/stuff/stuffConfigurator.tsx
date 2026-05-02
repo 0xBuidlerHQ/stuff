@@ -17,6 +17,9 @@ const GRID_SIZE = 42;
 const ProductConfigurator = ({ stuff }: ProductConfiguratorProps) => {
 	const { stuffCollection: collection, stuffAddress } = stuff;
 	const { options, palette, sku } = collection;
+
+	const productCheckoutStore = useProductCheckoutStore();
+
 	const openCheckoutDrawer = useProductCheckoutStore((state) => state.openCheckoutDrawer);
 	const storedConfiguration = useProductConfiguratorStore(
 		(state) => state.configurationsBySku[sku],

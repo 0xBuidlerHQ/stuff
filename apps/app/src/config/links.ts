@@ -3,9 +3,9 @@ const links = {
 		name: "home",
 		url: "/",
 	},
-	products: {
-		name: "products",
-		url: "/products",
+	stuffs: {
+		name: "stuffs",
+		url: "/stuffs",
 	},
 	wall: {
 		name: "wall",

@@ -40,9 +40,9 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     uint256 public constant CANVAS_SIZE = CANVAS_WIDTH * CANVAS_HEIGHT;
 
     /**
-     * @dev Struct StuffCollection.
+     * @dev Struct StuffBlueprint.
      */
-    struct StuffCollection {
+    struct StuffBlueprint {
         string sku;
         string category;
         string metadataURI;
@@ -160,24 +160,23 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
         _;
     }
 
-    constructor(uint256 _stuffId, StuffCollection memory _stuffCollection, address _owner, address _relayer)
+    constructor(uint256 _stuffId, StuffBlueprint memory _stuffBlueprint, address _owner, address _relayer)
         ERC721(
             string(abi.encodePacked("stuff#", Strings.toString(_stuffId))),
             string(abi.encodePacked("STUFF#", Strings.toString(_stuffId)))
         )
     {
         if (
-            bytes(_stuffCollection.category).length == 0 || bytes(_stuffCollection.sku).length == 0
-                || bytes(_stuffCollection.metadataURI).length == 0
-                || address(_stuffCollection.paymentToken) == address(0)
-                || _stuffCollection.paymentRecipient == address(0) || _stuffCollection.maxSupply <= 0
-                || _stuffCollection.mintPriceToken <= 0
+            bytes(_stuffBlueprint.category).length == 0 || bytes(_stuffBlueprint.sku).length == 0
+                || bytes(_stuffBlueprint.metadataURI).length == 0 || address(_stuffBlueprint.paymentToken) == address(0)
+                || _stuffBlueprint.paymentRecipient == address(0) || _stuffBlueprint.maxSupply <= 0
+                || _stuffBlueprint.mintPriceToken <= 0
         ) {
             revert InvalidConfig();
         }
 
-        if (_stuffCollection.palette.length == 0 || _stuffCollection.palette.length > uint256(type(uint8).max) + 1) {
-            revert InvalidPaletteLength(_stuffCollection.palette.length);
+        if (_stuffBlueprint.palette.length == 0 || _stuffBlueprint.palette.length > uint256(type(uint8).max) + 1) {
+            revert InvalidPaletteLength(_stuffBlueprint.palette.length);
         }
 
         if (_owner == address(0)) revert InvalidOwner();
@@ -187,16 +186,16 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
         owner = _owner;
         relayer = _relayer;
 
-        SKU = _stuffCollection.sku;
-        CATEGORY = _stuffCollection.category;
-        METADATA_URI = _stuffCollection.metadataURI;
-        PALETTE = _stuffCollection.palette;
-        OPTIONS = _stuffCollection.options;
+        SKU = _stuffBlueprint.sku;
+        CATEGORY = _stuffBlueprint.category;
+        METADATA_URI = _stuffBlueprint.metadataURI;
+        PALETTE = _stuffBlueprint.palette;
+        OPTIONS = _stuffBlueprint.options;
 
-        PAYMENT_TOKEN = _stuffCollection.paymentToken;
-        PAYMENT_RECIPIENT = _stuffCollection.paymentRecipient;
-        MAX_SUPPLY = _stuffCollection.maxSupply;
-        MINT_PRICE_TOKEN = _stuffCollection.mintPriceToken;
+        PAYMENT_TOKEN = _stuffBlueprint.paymentToken;
+        PAYMENT_RECIPIENT = _stuffBlueprint.paymentRecipient;
+        MAX_SUPPLY = _stuffBlueprint.maxSupply;
+        MINT_PRICE_TOKEN = _stuffBlueprint.mintPriceToken;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -240,8 +239,8 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     /**
      * @dev getCollection.
      */
-    function getCollection() public view returns (StuffCollection memory collection) {
-        collection = StuffCollection({
+    function getStuffBlueprint() public view returns (StuffBlueprint memory stuffBlueprint) {
+        stuffBlueprint = StuffBlueprint({
             sku: SKU,
             metadataURI: METADATA_URI,
             palette: PALETTE,

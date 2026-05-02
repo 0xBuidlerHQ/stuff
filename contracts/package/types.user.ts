@@ -21,6 +21,17 @@ export namespace StuffERC721 {
 		canvas: Bytes;
 		options: Array<Array<string>>;
 	};
+	export type StuffBlueprint = {
+		sku: string;
+		category: string;
+		metadataURI: string;
+		palette: Array<string>;
+		options: Array<Array<string>>;
+		paymentToken: Address;
+		paymentRecipient: Address;
+		maxSupply: bigint;
+		mintPriceToken: bigint;
+	};
 	export type StuffCollection = {
 		sku: string;
 		category: string;

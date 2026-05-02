@@ -14,8 +14,8 @@ const RouteLabel = () => {
 
 	return (
 		<Container>
-			<Box className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
-				<Box>/</Box>
+			<Box className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground pb-4">
+				<Box>{"//"}</Box>
 				{segments.map((segment, index) => {
 					const isLeaf = index === segments.length - 1;
 					const href = `/${segments.slice(0, index + 1).join("/")}`;
@@ -28,7 +28,7 @@ const RouteLabel = () => {
 									{segment}
 								</Link>
 							) : (
-								<Box>{segment}</Box>
+								<Box className="underline underline-offset-2">{segment}</Box>
 							)}
 						</Box>
 					);

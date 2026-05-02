@@ -25,14 +25,14 @@ contract StuffFactory {
     /**
      * @dev
      */
-    function createStuffERC721(StuffERC721.StuffCollection calldata _stuffCollection, address _owner, address _relayer)
+    function createStuffERC721(StuffERC721.StuffBlueprint calldata _stuffBlueprint, address _owner, address _relayer)
         external
         returns (StuffERC721 stuff)
     {
         uint256 stuffId = stuffIdsIndex++;
 
         stuff =
-            new StuffERC721({_stuffId: stuffId, _stuffCollection: _stuffCollection, _owner: _owner, _relayer: _relayer});
+            new StuffERC721({_stuffId: stuffId, _stuffBlueprint: _stuffBlueprint, _owner: _owner, _relayer: _relayer});
 
         stuffs[stuffId] = stuff;
 

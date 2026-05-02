@@ -10,6 +10,7 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { simulateContract, waitForTransactionReceipt, writeContract } from "viem/actions";
 import { anvil, base, baseSepolia } from "viem/chains";
+import { env } from "@/config/env";
 
 const mintWithAuthorizationAbi = [
 	{
@@ -85,11 +86,11 @@ const chainById: Record<number, Chain> = {
 const getRpcUrl = (chainId: number) => {
 	switch (chainId) {
 		case anvil.id:
-			return process.env.RPC_URL || "http://127.0.0.1:8545";
+			return env.RPC_URL;
 		case base.id:
-			return process.env.BASE_RPC_URL;
+			return env.BASE_RPC_URL;
 		case baseSepolia.id:
-			return process.env.BASE_SEPOLIA_RPC_URL;
+			return env.BASE_SEPOLIA_RPC_URL;
 		default:
 			return undefined;
 	}
@@ -98,11 +99,7 @@ const getRpcUrl = (chainId: number) => {
 export async function POST(request: Request) {
 	try {
 		const body = (await request.json()) as MintWithAuthorizationRequest;
-		const relayerPrivateKey = process.env.RELAYER_PRIVATE_KEY as Hex | undefined;
-
-		if (!relayerPrivateKey) {
-			return NextResponse.json({ error: "Missing RELAYER_PRIVATE_KEY." }, { status: 500 });
-		}
+		const relayerPrivateKey = env.RELAYER_PRIVATE_KEY as Hex;
 
 		const chain = chainById[body.chainId];
 		const rpcUrl = getRpcUrl(body.chainId);

@@ -3,6 +3,7 @@ import { getFactoryProjects } from "@/features/product-catalog";
 
 const Page = async () => {
 	const projects = await getFactoryProjects();
+
 	const accountProjects: AccountProject[] = projects.map((project) => ({
 		slug: project.slug,
 		stuffAddress: project.stuffAddress,
