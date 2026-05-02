@@ -3,13 +3,13 @@
 
 :root {
 	--app-w: 1680px !important;
-	--app-px: 1rem !important;
+	--app-px: 2rem !important;
 
 	--header-w: 1680px !important;
-	--header-px: 1rem !important;
+	--header-px: 2rem !important;
 
 	--footer-w: 1680px !important;
-	--footer-px: 1rem !important;
+	--footer-px: 2rem !important;
 }
 
 :root {

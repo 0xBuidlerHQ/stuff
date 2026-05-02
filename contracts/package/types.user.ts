@@ -3,6 +3,15 @@ export type Address = string;
 export type Bytes = string;
 
 export namespace StuffERC721 {
+	export type MintAuthorization = {
+		from: Address;
+		validAfter: bigint;
+		validBefore: bigint;
+		nonce: Bytes;
+		v: number;
+		r: Bytes;
+		s: Bytes;
+	};
 	export type Stuff = {
 		author: string;
 		authorAddress: Address;

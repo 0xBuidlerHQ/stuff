@@ -7,12 +7,14 @@ import { geistSans, interSans, tronicaMono, unbounded } from "@/config/fonts";
 import { Footer } from "@/layouts/footer";
 import { Globals } from "@/layouts/globals";
 import { Header } from "@/layouts/header";
+import { RouteLabel } from "@/layouts/route-label";
+import { Box } from "@/primitives/box";
 import { Providers } from "@/providers";
 import { wagmiConfig } from "@/providers/wagmi.config";
 import { cn } from "@/utils";
 
 export const metadata: Metadata = {
-	title: "Echo Project",
+	title: "CARRE",
 	description: "",
 };
 
@@ -39,7 +41,13 @@ export default async function RootLayout({
 					<Header />
 
 					<main className="flex grow min-h-0">
-						<div className="grow relative">{children}</div>
+						<div className="grow relative">
+							<Box className="py-10 grid gap-2">
+								<RouteLabel />
+
+								{children}
+							</Box>
+						</div>
 					</main>
 
 					<Footer />

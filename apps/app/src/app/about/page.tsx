@@ -4,10 +4,7 @@ import { Container } from "@/primitives/container";
 const Page = () => {
 	return (
 		<Container>
-			<Box className="max-w-125 mx-auto text-center text-sm">
-				TODO
-				<br />
-				<br />
+			<Box className="text-4xl">
 				There’s a quiet exhaustion in the world today — the kind that doesn’t come from doing too
 				much, but from wading through too much nonsense. Everywhere you look, things are
 				overcomplicated, overdesigned, overhyped. Products shout instead of speak. Choices multiply,

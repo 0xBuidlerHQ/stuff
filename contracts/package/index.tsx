@@ -772,6 +772,54 @@ export const ierc20ErrorsAbi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IERC3009
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const ierc3009Abi = [
+  {
+    type: 'function',
+    inputs: [
+      { name: 'from', internalType: 'address', type: 'address' },
+      { name: 'to', internalType: 'address', type: 'address' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
+      { name: 'validAfter', internalType: 'uint256', type: 'uint256' },
+      { name: 'validBefore', internalType: 'uint256', type: 'uint256' },
+      { name: 'nonce', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'v', internalType: 'uint8', type: 'uint8' },
+      { name: 'r', internalType: 'bytes32', type: 'bytes32' },
+      { name: 's', internalType: 'bytes32', type: 'bytes32' },
+    ],
+    name: 'receiveWithAuthorization',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IERC3009Receiver
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const ierc3009ReceiverAbi = [
+  {
+    type: 'function',
+    inputs: [
+      { name: 'from', internalType: 'address', type: 'address' },
+      { name: 'to', internalType: 'address', type: 'address' },
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
+      { name: 'validAfter', internalType: 'uint256', type: 'uint256' },
+      { name: 'validBefore', internalType: 'uint256', type: 'uint256' },
+      { name: 'nonce', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'v', internalType: 'uint8', type: 'uint8' },
+      { name: 'r', internalType: 'bytes32', type: 'bytes32' },
+      { name: 's', internalType: 'bytes32', type: 'bytes32' },
+    ],
+    name: 'receiveWithAuthorization',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IERC721Enumerable
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1616,6 +1664,7 @@ export const stuffErc721Abi = [
         ],
       },
       { name: '_owner', internalType: 'address', type: 'address' },
+      { name: '_relayer', internalType: 'address', type: 'address' },
     ],
     stateMutability: 'nonpayable',
   },
@@ -1758,6 +1807,41 @@ export const stuffErc721Abi = [
   },
   {
     type: 'function',
+    inputs: [
+      { name: '_to', internalType: 'address', type: 'address' },
+      {
+        name: '_params',
+        internalType: 'struct StuffERC721.StuffMintParams',
+        type: 'tuple',
+        components: [
+          { name: 'author', internalType: 'string', type: 'string' },
+          { name: 'title', internalType: 'string', type: 'string' },
+          { name: 'description', internalType: 'string', type: 'string' },
+          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
+        ],
+      },
+      {
+        name: '_authorization',
+        internalType: 'struct StuffERC721.MintAuthorization',
+        type: 'tuple',
+        components: [
+          { name: 'from', internalType: 'address', type: 'address' },
+          { name: 'validAfter', internalType: 'uint256', type: 'uint256' },
+          { name: 'validBefore', internalType: 'uint256', type: 'uint256' },
+          { name: 'nonce', internalType: 'bytes32', type: 'bytes32' },
+          { name: 'v', internalType: 'uint8', type: 'uint8' },
+          { name: 'r', internalType: 'bytes32', type: 'bytes32' },
+          { name: 's', internalType: 'bytes32', type: 'bytes32' },
+        ],
+      },
+    ],
+    name: 'mintWithAuthorization',
+    outputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     inputs: [],
     name: 'name',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
@@ -1780,9 +1864,9 @@ export const stuffErc721Abi = [
   {
     type: 'function',
     inputs: [],
-    name: 'renounceOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
+    name: 'relayer',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -1895,6 +1979,13 @@ export const stuffErc721Abi = [
     stateMutability: 'nonpayable',
   },
   {
+    type: 'function',
+    inputs: [{ name: 'newRelayer', internalType: 'address', type: 'address' }],
+    name: 'updateRelayer',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
     type: 'event',
     anonymous: false,
     inputs: [
@@ -1957,19 +2048,26 @@ export const stuffErc721Abi = [
     anonymous: false,
     inputs: [
       {
-        name: 'previousOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newOwner',
+        name: 'owner',
         internalType: 'address',
         type: 'address',
         indexed: true,
       },
     ],
-    name: 'OwnershipTransferred',
+    name: 'OwnerUpdated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'relayer',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'RelayerUpdated',
   },
   {
     type: 'event',
@@ -2102,22 +2200,14 @@ export const stuffErc721Abi = [
     inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
     name: 'InvalidOptionsLength',
   },
+  { type: 'error', inputs: [], name: 'InvalidOwner' },
   {
     type: 'error',
     inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
     name: 'InvalidPaletteLength',
   },
+  { type: 'error', inputs: [], name: 'InvalidRelayer' },
   { type: 'error', inputs: [], name: 'MaxSupplyReached' },
-  {
-    type: 'error',
-    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
-    name: 'OwnableInvalidOwner',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
-    name: 'OwnableUnauthorizedAccount',
-  },
   {
     type: 'error',
     inputs: [{ name: 'colorIndex', internalType: 'uint8', type: 'uint8' }],
@@ -2128,6 +2218,7 @@ export const stuffErc721Abi = [
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
     name: 'SafeERC20FailedOperation',
   },
+  { type: 'error', inputs: [], name: 'Unauthorized' },
 ] as const
 
 /**
@@ -2136,7 +2227,7 @@ export const stuffErc721Abi = [
  */
 export const stuffErc721Address = {
   8453: '0x176701A02AD3B00a8BF51a066E96252675B00258',
-  31337: '0xf6B55614076BA5D1C1bc737FEAC29D8c76FE1bb1',
+  31337: '0xec82bB27E98B4866883E5DD6D49D576DA3A39051',
 } as const
 
 /**
@@ -2185,6 +2276,7 @@ export const stuffFactoryAbi = [
         ],
       },
       { name: '_owner', internalType: 'address', type: 'address' },
+      { name: '_relayer', internalType: 'address', type: 'address' },
     ],
     name: 'createStuffERC721',
     outputs: [
@@ -2235,7 +2327,7 @@ export const stuffFactoryAbi = [
  */
 export const stuffFactoryAddress = {
   8453: '0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940',
-  31337: '0x1C6dDd12225B411f20d6dCAf45113de632166FAd',
+  31337: '0x9cC5DbDc603cD1C53a1222f5c6c517Af6Cb57B42',
 } as const
 
 /**

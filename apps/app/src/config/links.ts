@@ -7,11 +7,23 @@ const links = {
 		name: "products",
 		url: "/products",
 	},
+	wall: {
+		name: "wall",
+		url: "/wall",
+	},
+	culture: {
+		name: "culture",
+		url: "/culture",
+	},
+	account: {
+		name: "account",
+		url: "/account",
+	},
 	about: {
 		name: "about",
 		url: "/about",
 	},
-} as const;
+};
 
 const externalLinks = {
 	telegram: "https://t.me/the0xbuidler",

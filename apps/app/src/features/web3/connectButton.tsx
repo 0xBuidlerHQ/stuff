@@ -1,8 +1,9 @@
 "use client";
 
-import { Beaut } from "@0xhq/beaut";
 import { Loader2, LogOutIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { links } from "@/config/links";
+import { NavigationItem } from "@/layouts/header";
 import { Box } from "@/primitives/box";
 import { Button } from "@/primitives/button";
 import { useWeb3 } from "@/providers/web3";
@@ -23,18 +24,13 @@ const LoadingButton = () => {
 };
 
 const ConnectedButton = () => {
-	const { eoa, disconnect } = useWeb3();
+	const { disconnect } = useWeb3();
 
 	return (
 		<Box className="flex gap-2 h-8 items-center text-sm font-medium">
-			<Box className="h-full flex justify-center items-center bg-muted rounded px-4 w-40">
-				<Box>{Beaut.address(eoa.address)}</Box>
-			</Box>
+			<NavigationItem {...links.account} />
 
-			<Button
-				onClick={disconnect}
-				className="h-full flex justify-center items-center rounded transition-all px-3 bg-foreground text-background"
-			>
+			<Button onClick={disconnect}>
 				<LogOutIcon className="size-4" />
 			</Button>
 		</Box>
@@ -45,11 +41,11 @@ const DisconnectedButton = () => {
 	const { connect } = useWeb3();
 
 	return (
-		<Button onClick={connect}>
-			<Box className="h-8 bg-foreground text-background flex items-center justify-center p-4 rounded">
-				LOG IN
-			</Box>
-		</Button>
+		<Box className="h-8 flex items-center">
+			<Button onClick={connect} className="transition-all hover:bg-red-500 hover:text-background">
+				<Box className="text-xs px-1">Connect</Box>
+			</Button>
+		</Box>
 	);
 };
 

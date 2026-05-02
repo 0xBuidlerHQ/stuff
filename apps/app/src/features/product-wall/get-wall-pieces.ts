@@ -115,4 +115,4 @@ const getWallPieces = cache(
 );
 
 export type { WallPiece };
-export { CANVAS_SIZE, getWallPieces };
+export { CANVAS_SIZE, decodeCanvasToPixels, getWallPieces };

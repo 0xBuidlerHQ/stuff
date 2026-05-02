@@ -11,6 +11,12 @@ import { HeaderPrimitive } from "@/primitives/header";
 const Header = () => {
 	return (
 		<HeaderPrimitive>
+			<Box className="py-[2px]">
+				<WorldClock />
+			</Box>
+
+			<div className="bg-muted h-px" />
+
 			<Box className="flex justify-between py-2">
 				<Box className="flex items-center">
 					<Link className="text-sm font-medium" href={links.home.url}>
@@ -32,12 +38,6 @@ const Header = () => {
 							built for a world that’s had enough.
 						</span>
 					</Box>
-
-					<Box className="w-8 flex items-center justify-center">
-						<Box className="h-4 w-px bg-muted-foreground" />
-					</Box>
-
-					<WorldClock />
 				</Box>
 
 				<Box>
@@ -50,24 +50,28 @@ const Header = () => {
 	);
 };
 
-const NavigationItems = [links.products, links.about];
+const NavigationItems = [links.products, links.wall, links.about];
+
+const NavigationItem = (props: (typeof NavigationItems)[number]) => {
+	return (
+		<Button
+			key={props.url}
+			href={props.url}
+			className="transition-all hover:bg-red-500 hover:text-background"
+		>
+			<Box className="text-xs px-1">{props.name}</Box>
+		</Button>
+	);
+};
 
 const Navigation = () => {
 	return (
 		<Box className="flex items-center justify-center gap-4">
 			{NavigationItems.map((navigationItem) => {
-				return (
-					<Button
-						key={navigationItem.url}
-						href={navigationItem.url}
-						className="transition-all hover:bg-red-500 hover:text-background"
-					>
-						<Box className="text-xs px-1">{navigationItem.name}</Box>
-					</Button>
-				);
+				return <NavigationItem key={navigationItem.name} {...navigationItem} />;
 			})}
 		</Box>
 	);
 };
 
-export { Header };
+export { Header, NavigationItem };

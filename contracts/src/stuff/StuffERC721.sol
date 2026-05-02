@@ -3,15 +3,28 @@ pragma solidity ^0.8.28;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
+interface IERC3009 {
+    function receiveWithAuthorization(
+        address from,
+        address to,
+        uint256 value,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external;
+}
+
 /**
  * @dev StuffERC721.
  */
-contract StuffERC721 is ERC721, ERC721Enumerable, Ownable {
+contract StuffERC721 is ERC721, ERC721Enumerable {
     using SafeERC20 for IERC20;
 
     /**
@@ -55,6 +68,19 @@ contract StuffERC721 is ERC721, ERC721Enumerable, Ownable {
     }
 
     /**
+     * @dev Struct MintAuthorization.
+     */
+    struct MintAuthorization {
+        address from;
+        uint256 validAfter;
+        uint256 validBefore;
+        bytes32 nonce;
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    /**
      * @dev Struct Stuff.
      */
     struct Stuff {
@@ -88,6 +114,8 @@ contract StuffERC721 is ERC721, ERC721Enumerable, Ownable {
     /**
      * @dev Variables.
      */
+    address public owner;
+    address public relayer;
     uint256 public tokenIdsIndex = 0;
 
     /**
@@ -100,11 +128,16 @@ contract StuffERC721 is ERC721, ERC721Enumerable, Ownable {
      */
     event StuffCreated(uint256 indexed tokenId, address indexed authorAddress, bytes32 canvasHash);
     event MetadataURIUpdated(string metadataURI);
+    event OwnerUpdated(address indexed owner);
+    event RelayerUpdated(address indexed relayer);
 
     /**
      * @dev Errors.
      */
     error InvalidConfig();
+    error InvalidOwner();
+    error InvalidRelayer();
+    error Unauthorized();
     error InvalidPaletteLength(uint256 length);
     error MaxSupplyReached();
     error InvalidCanvasLength(uint256 length);
@@ -117,12 +150,21 @@ contract StuffERC721 is ERC721, ERC721Enumerable, Ownable {
     /**
      * @dev Constructor.
      */
-    constructor(uint256 _stuffId, StuffCollection memory _stuffCollection, address _owner)
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert Unauthorized();
+        _;
+    }
+
+    modifier onlyRelayer() {
+        if (msg.sender != relayer) revert Unauthorized();
+        _;
+    }
+
+    constructor(uint256 _stuffId, StuffCollection memory _stuffCollection, address _owner, address _relayer)
         ERC721(
             string(abi.encodePacked("stuff#", Strings.toString(_stuffId))),
             string(abi.encodePacked("STUFF#", Strings.toString(_stuffId)))
         )
-        Ownable(_owner)
     {
         if (
             bytes(_stuffCollection.category).length == 0 || bytes(_stuffCollection.sku).length == 0
@@ -138,7 +180,12 @@ contract StuffERC721 is ERC721, ERC721Enumerable, Ownable {
             revert InvalidPaletteLength(_stuffCollection.palette.length);
         }
 
+        if (_owner == address(0)) revert InvalidOwner();
+        if (_relayer == address(0)) revert InvalidRelayer();
+
         STUFF_ID = _stuffId;
+        owner = _owner;
+        relayer = _relayer;
 
         SKU = _stuffCollection.sku;
         CATEGORY = _stuffCollection.category;
@@ -159,27 +206,35 @@ contract StuffERC721 is ERC721, ERC721Enumerable, Ownable {
      * @dev mint.
      */
     function mint(address _to, StuffMintParams calldata _params) external returns (uint256 tokenId) {
-        if (tokenIdsIndex >= MAX_SUPPLY) revert MaxSupplyReached();
-
-        tokenId = tokenIdsIndex++;
-
-        Stuff storage stuff = _stuffs[tokenId];
-
-        stuff.author = _params.author;
-        stuff.authorAddress = msg.sender;
-
-        stuff.title = _params.title;
-        stuff.description = _params.description;
-        stuff.creationDate = block.timestamp;
-
-        stuff.canvas = _validateCanvas(_params.canvas);
-        stuff.options = _validateOptions(_params.options);
-
         PAYMENT_TOKEN.safeTransferFrom(msg.sender, PAYMENT_RECIPIENT, MINT_PRICE_TOKEN);
 
-        _safeMint(_to, tokenId);
+        tokenId = _mintStuff(_to, msg.sender, _params);
+    }
 
-        emit StuffCreated(tokenId, stuff.authorAddress, keccak256(stuff.canvas));
+    /**
+     * @dev mintWithAuthorization.
+     */
+    function mintWithAuthorization(
+        address _to,
+        StuffMintParams calldata _params,
+        MintAuthorization calldata _authorization
+    ) external onlyRelayer returns (uint256 tokenId) {
+        IERC3009(address(PAYMENT_TOKEN))
+            .receiveWithAuthorization(
+                _authorization.from,
+                address(this),
+                MINT_PRICE_TOKEN,
+                _authorization.validAfter,
+                _authorization.validBefore,
+                _authorization.nonce,
+                _authorization.v,
+                _authorization.r,
+                _authorization.s
+            );
+
+        PAYMENT_TOKEN.safeTransfer(PAYMENT_RECIPIENT, MINT_PRICE_TOKEN);
+
+        tokenId = _mintStuff(_to, _authorization.from, _params);
     }
 
     /**
@@ -215,6 +270,28 @@ contract StuffERC721 is ERC721, ERC721Enumerable, Ownable {
         METADATA_URI = metadataURI_;
 
         emit MetadataURIUpdated(metadataURI_);
+    }
+
+    /**
+     * @dev transferOwnership.
+     */
+    function transferOwnership(address newOwner) external onlyOwner {
+        if (newOwner == address(0)) revert InvalidOwner();
+
+        owner = newOwner;
+
+        emit OwnerUpdated(newOwner);
+    }
+
+    /**
+     * @dev updateRelayer.
+     */
+    function updateRelayer(address newRelayer) external onlyOwner {
+        if (newRelayer == address(0)) revert InvalidRelayer();
+
+        relayer = newRelayer;
+
+        emit RelayerUpdated(newRelayer);
     }
 
     /**
@@ -259,6 +336,34 @@ contract StuffERC721 is ERC721, ERC721Enumerable, Ownable {
         }
 
         options = _options;
+    }
+
+    /**
+     * @dev _mintStuff.
+     */
+    function _mintStuff(address _to, address _authorAddress, StuffMintParams calldata _params)
+        internal
+        returns (uint256 tokenId)
+    {
+        if (tokenIdsIndex >= MAX_SUPPLY) revert MaxSupplyReached();
+
+        tokenId = tokenIdsIndex++;
+
+        Stuff storage stuff = _stuffs[tokenId];
+
+        stuff.author = _params.author;
+        stuff.authorAddress = _authorAddress;
+
+        stuff.title = _params.title;
+        stuff.description = _params.description;
+        stuff.creationDate = block.timestamp;
+
+        stuff.canvas = _validateCanvas(_params.canvas);
+        stuff.options = _validateOptions(_params.options);
+
+        _safeMint(_to, tokenId);
+
+        emit StuffCreated(tokenId, stuff.authorAddress, keccak256(stuff.canvas));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

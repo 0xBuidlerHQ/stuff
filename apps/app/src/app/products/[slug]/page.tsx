@@ -1,5 +1,6 @@
 import { Beaut } from "@0xhq/beaut";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import Img from "@/app/icon.svg";
 import { getFactoryProjects } from "@/features/product-catalog";
 import { ProductConfigurator } from "@/features/product-configurator";
@@ -18,7 +19,7 @@ const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
 	const projects = await getFactoryProjects();
 	const project = projects.find((item) => item.slug === slug);
 
-	if (!project) throw new Error(`Unknown project slug: ${slug}`);
+	if (!project) notFound();
 
 	const projectCollection = project.collection;
 
@@ -28,7 +29,6 @@ const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
 				<div className="min-w-0 desktop:sticky desktop:top-0 desktop:h-screen desktop:self-start">
 					<Box className="grid h-full min-h-0 gap-6 overflow-hidden">
 						<Box className="flex flex-col gap-2">
-							<h1 className="text-sm text-muted-foreground">/{projectCollection.category}</h1>
 							<Box className="flex items-center justify-between gap-4">
 								<Box className="flex items-center gap-2">
 									<h1 className="text-5xl">{projectCollection.sku}</h1>

@@ -10,20 +10,29 @@ import {Actors} from "./utils/Actors.s.sol";
 import {Packages} from "./utils/Packages.s.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract Deploy is Actors, Packages, StdCheats {
+    using SafeERC20 for IERC20;
+
     bytes32 internal constant SALT = keccak256("SALT");
+
+    address internal constant RELAYER = 0x63Cbfe3908480b5f745122DB1a50E5C2A6AE9425;
+    address internal constant BASE_USDC_WHALE = 0x8da91A6298eA5d1A8Bc985e99798fd0A0f05701a;
 
     address internal constant BASE_USDC = 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913;
     address internal constant BASE_SEPOLIA_USDC = 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
 
+    uint256 internal constant ANVIL_CHAIN_ID = 31337;
     uint256 internal constant BASE_CHAIN_ID = 8453;
     uint256 internal constant BASE_SEPOLIA_CHAIN_ID = 84532;
+
     uint256 internal constant INITIAL_USDC_BALANCE = 1_000e6;
     uint256 internal constant STUFF_MAX_SUPPLY = 10_000;
     uint256 internal constant STUFF_MINT_PRICE_USDC = 1e6;
 
     error UnsupportedChain(uint256 chainId);
+    error InsufficientWhaleBalance(address whale, uint256 balance, uint256 required);
 
     function run() external {
         Actor memory deployer = actor("DEPLOYER", 0);
@@ -40,8 +49,7 @@ contract Deploy is Actors, Packages, StdCheats {
 
         IERC20 usdc = IERC20(_getUsdcAddress());
 
-        deal(address(usdc), alice.addr, INITIAL_USDC_BALANCE);
-        deal(address(usdc), bob.addr, INITIAL_USDC_BALANCE);
+        _fundLocalActors(deployer, usdc, alice.addr, bob.addr);
 
         /*******************************
          * @dev Deploy contracts.
@@ -65,7 +73,8 @@ contract Deploy is Actors, Packages, StdCheats {
                 maxSupply: STUFF_MAX_SUPPLY,
                 mintPriceToken: STUFF_MINT_PRICE_USDC
             }),
-            deployer.addr
+            deployer.addr,
+            RELAYER
         );
 
         stop();
@@ -79,9 +88,50 @@ contract Deploy is Actors, Packages, StdCheats {
         addDeployment("StuffERC721", address(stuffERC721));
     }
 
+    function _fundLocalActors(Actor memory deployer, IERC20 usdc, address alice, address bob) internal {
+        if (block.chainid != ANVIL_CHAIN_ID) return;
+
+        deployer;
+
+        uint256 required = INITIAL_USDC_BALANCE * 3;
+        uint256 whaleBalance = usdc.balanceOf(BASE_USDC_WHALE);
+
+        if (whaleBalance < required) {
+            revert InsufficientWhaleBalance(BASE_USDC_WHALE, whaleBalance, required);
+        }
+
+        vm.rpc("anvil_setBalance", string.concat("[\"", vm.toString(BASE_USDC_WHALE), "\",\"0xde0b6b3a7640000\"]"));
+        vm.rpc("anvil_impersonateAccount", string.concat("[\"", vm.toString(BASE_USDC_WHALE), "\"]"));
+
+        _sendUsdcFromWhale(address(usdc), BASE_USDC_WHALE, alice, INITIAL_USDC_BALANCE);
+        _sendUsdcFromWhale(address(usdc), BASE_USDC_WHALE, bob, INITIAL_USDC_BALANCE);
+        _sendUsdcFromWhale(address(usdc), BASE_USDC_WHALE, RELAYER, INITIAL_USDC_BALANCE);
+
+        vm.rpc("anvil_stopImpersonatingAccount", string.concat("[\"", vm.toString(BASE_USDC_WHALE), "\"]"));
+    }
+
+    function _sendUsdcFromWhale(address usdc, address whale, address to, uint256 amount) internal {
+        bytes memory data = abi.encodeCall(IERC20.transfer, (to, amount));
+
+        vm.rpc(
+            "eth_sendTransaction",
+            string.concat(
+                "[{\"from\":\"",
+                vm.toString(whale),
+                "\",\"to\":\"",
+                vm.toString(usdc),
+                "\",\"data\":\"",
+                vm.toString(data),
+                "\"}]"
+            )
+        );
+    }
+
     function _getUsdcAddress() internal view returns (address usdc) {
         if (block.chainid == BASE_CHAIN_ID) return BASE_USDC;
         if (block.chainid == BASE_SEPOLIA_CHAIN_ID) return BASE_SEPOLIA_USDC;
+
+        if (block.chainid == ANVIL_CHAIN_ID) return BASE_USDC;
 
         revert UnsupportedChain(block.chainid);
     }
