@@ -5,11 +5,10 @@ import { notFound } from "next/navigation";
 
 import Img from "@/app/icon.svg";
 import { env } from "@/config/env";
-
-//
+import { StuffConfigurator } from "@/features/stuff-configurator/stuff-configurator";
 
 import { getStuffs } from "@/features/stuff/getStuffs";
-import { StuffGalery } from "@/features/stuff/stuffGalery";
+import { StuffGallery } from "@/features/stuff/stuffGallery";
 
 import { Box } from "@/primitives/box";
 import { Container } from "@/primitives/container";
@@ -52,7 +51,7 @@ const StuffPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 							</h1>
 						</Box>
 
-						<StuffGalery stuff={stuff} />
+						<StuffGallery stuff={stuff} />
 					</Box>
 				</Box>
 

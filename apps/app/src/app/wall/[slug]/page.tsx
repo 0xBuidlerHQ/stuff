@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { env } from "@/config/env";
-import { getWallPieces, ProductWall } from "@/features/product-wall";
+import { getWallPieces } from "@/features/stuff-wall/get-wall-pieces";
+import { StuffWall } from "@/features/stuff-wall/wall";
 import { getStuffs } from "@/features/stuff/getStuffs";
 
 export const dynamicParams = false;
@@ -12,13 +13,13 @@ export const generateStaticParams = async () => {
 const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
 	const { slug } = await params;
 	const stuffs = await getStuffs({ chainId: env.CHAIN_ID as any });
-	const project = stuffs.find((stuff) => stuff.slug === slug);
+	const stuff = stuffs.find((item) => item.slug === slug);
 
-	if (!project) notFound();
+	if (!stuff) notFound();
 
-	const pieces = await getWallPieces(project.stuffAddress, project.collection);
+	const pieces = await getWallPieces(stuff.address, stuff.blueprint);
 
-	return <ProductWall collection={project.collection} pieces={pieces} slug={project.slug} />;
+	return <StuffWall stuff={stuff} pieces={pieces} />;
 };
 
 export default Page;

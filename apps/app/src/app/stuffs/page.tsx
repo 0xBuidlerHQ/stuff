@@ -11,7 +11,7 @@ const StuffsPage = async () => {
 		<Container>
 			<Box className="grid grid-cols-4 mobile:grid-cols-1 gap-4">
 				{stuffs.map((stuff) => (
-					<Stuff key={stuff.id} {...stuff} />
+					<Stuff key={stuff.id} stuff={stuff} />
 				))}
 			</Box>
 		</Container>

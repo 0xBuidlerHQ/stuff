@@ -5,7 +5,7 @@ import { parseSignature } from "viem";
 import type { Address } from "viem";
 import { useConfig, useWalletClient } from "wagmi";
 import { readContract } from "wagmi/actions";
-import type { ProductConfiguration } from "@/features/product-configurator/store";
+import type { StuffConfiguration } from "@/features/stuff-configurator/provider";
 import { useWeb3 } from "@/providers/web3";
 import {
 	erc3009MetadataAbi,
@@ -13,11 +13,12 @@ import {
 	getReceiveWithAuthorizationMessage,
 	receiveWithAuthorizationTypes,
 } from "./purchase";
-import { useProductCheckoutStore } from "./store";
 
-const useProductPurchase = (configuration?: ProductConfiguration) => {
+const useStuffPurchase = (
+	configuration?: StuffConfiguration,
+	options?: { onSuccess?: () => void },
+) => {
 	const config = useConfig();
-	const productCheckoutStore = useProductCheckoutStore();
 	const { connect, eoa, isConnected } = useWeb3();
 	const { data: walletClient } = useWalletClient();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,7 +47,7 @@ const useProductPurchase = (configuration?: ProductConfiguration) => {
 			setErrorMessage(null);
 
 			const owner = eoa.address as Address;
-			const paymentToken = configuration.collection.paymentToken as Address;
+			const paymentToken = configuration.blueprint.paymentToken as Address;
 			const [name, version, balance] = await Promise.all([
 				readContract(config, {
 					abi: erc3009MetadataAbi,
@@ -66,14 +67,14 @@ const useProductPurchase = (configuration?: ProductConfiguration) => {
 				}),
 			]);
 
-			if (balance < configuration.collection.mintPriceToken) {
+			if (balance < configuration.blueprint.mintPriceToken) {
 				throw new Error("Insufficient USDC balance for this mint.");
 			}
 
 			const message = getReceiveWithAuthorizationMessage({
 				from: owner,
 				stuffAddress: configuration.stuffAddress,
-				value: configuration.collection.mintPriceToken,
+				value: configuration.blueprint.mintPriceToken,
 			});
 
 			const signature = await walletClient.signTypedData({
@@ -120,7 +121,7 @@ const useProductPurchase = (configuration?: ProductConfiguration) => {
 				throw new Error(body?.error || "Relay failed");
 			}
 
-			productCheckoutStore.closeCheckoutDrawer();
+			options?.onSuccess?.();
 		} catch (error) {
 			setErrorMessage(error instanceof Error ? error.message : "Purchase failed");
 		} finally {
@@ -138,4 +139,4 @@ const useProductPurchase = (configuration?: ProductConfiguration) => {
 	};
 };
 
-export { useProductPurchase };
+export { useStuffPurchase };

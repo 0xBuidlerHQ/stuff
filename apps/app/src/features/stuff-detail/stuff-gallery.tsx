@@ -3,12 +3,12 @@
 import Image, { type StaticImageData } from "next/image";
 import { useState } from "react";
 
-type ProductGalleryProps = {
+type StuffDetailGalleryProps = {
 	images: StaticImageData[];
 	sku: string;
 };
 
-const ProductGallery = ({ images, sku }: ProductGalleryProps) => {
+const StuffDetailGallery = ({ images, sku }: StuffDetailGalleryProps) => {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -56,4 +56,4 @@ const ProductGallery = ({ images, sku }: ProductGalleryProps) => {
 	);
 };
 
-export { ProductGallery };
+export { StuffDetailGallery };

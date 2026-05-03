@@ -3,9 +3,10 @@ import { stuffErc721Config } from "@0xhq/stuff.contracts";
 import type { StuffERC721 } from "@0xhq/stuff.contracts/types.user";
 import { notFound } from "next/navigation";
 import { readContract } from "wagmi/actions";
-import { getFactoryProjects } from "@/features/product-catalog";
-import { GridPreview } from "@/features/product-configurator/grid";
-import { decodeCanvasToPixels } from "@/features/product-wall/get-wall-pieces";
+import { env } from "@/config/env";
+import { GridPreview } from "@/features/stuff-configurator/grid";
+import { decodeCanvasToPixels } from "@/features/stuff-wall/get-wall-pieces";
+import { getStuffs } from "@/features/stuff/getStuffs";
 import { Box } from "@/primitives/box";
 import { Button } from "@/primitives/button";
 import { Container } from "@/primitives/container";
@@ -17,25 +18,31 @@ const Page = async ({
 	params: Promise<{ slug: string; tokenId: string }>;
 }) => {
 	const { slug, tokenId: tokenIdParam } = await params;
-	const projects = await getFactoryProjects();
-	const project = projects.find((item) => item.slug === slug);
+	const stuffs = await getStuffs({ chainId: env.CHAIN_ID as any });
+	const stuffCollection = stuffs.find((item) => item.slug === slug);
 
-	if (!project) notFound();
+	if (!stuffCollection) notFound();
 	if (!/^\d+$/.test(tokenIdParam)) notFound();
 
 	const tokenId = BigInt(tokenIdParam);
 
-	if (tokenId < BigInt(0) || tokenId >= project.collection.maxSupply) {
+	if (tokenId < BigInt(0) || tokenId >= stuffCollection.blueprint.maxSupply) {
 		notFound();
 	}
 
-	if (tokenId >= project.currentSupply) {
+	const currentSupply = (await readContract(wagmiConfig(), {
+		abi: stuffErc721Config.abi,
+		functionName: "tokenIdsIndex",
+		address: stuffCollection.address,
+	})) as bigint;
+
+	if (tokenId >= currentSupply) {
 		return (
 			<Container>
 				<Box className="grid gap-6 border border-border bg-background p-6 desktop:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
 					<Box className="grid gap-4">
 						<Box className="grid gap-2">
-							<Box className="text-4xl">{project.collection.sku}</Box>
+							<Box className="text-4xl">{stuffCollection.blueprint.sku}</Box>
 							<Box className="text-sm text-muted-foreground">#{tokenId.toString()}</Box>
 						</Box>
 
@@ -50,14 +57,17 @@ const Page = async ({
 						</Box>
 
 						<Box className="grid gap-2 text-sm">
-							<Meta label="Collection" value={project.collection.sku} />
+							<Meta label="Collection" value={stuffCollection.blueprint.sku} />
 							<Meta label="Token" value={`#${tokenId.toString()}`} />
-							<Meta label="Minted" value={project.currentSupply.toString()} />
-							<Meta label="Max supply" value={project.collection.maxSupply.toString()} />
+							<Meta label="Minted" value={currentSupply.toString()} />
+							<Meta label="Max supply" value={stuffCollection.blueprint.maxSupply.toString()} />
 						</Box>
 
 						<Box className="w-fit">
-							<Button href={`/wall/${project.slug}`} className="text-sm underline underline-offset-4">
+							<Button
+								href={`/wall/${stuffCollection.slug}`}
+								className="text-sm underline underline-offset-4"
+							>
 								Back to wall
 							</Button>
 						</Box>
@@ -76,17 +86,17 @@ const Page = async ({
 			abi: stuffErc721Config.abi,
 			functionName: "ownerOf",
 			args: [tokenId],
-			address: project.stuffAddress,
+			address: stuffCollection.address,
 		}),
 		readContract(wagmiConfig(), {
 			abi: stuffErc721Config.abi,
 			functionName: "getStuff",
 			args: [tokenId],
-			address: project.stuffAddress,
+			address: stuffCollection.address,
 		}),
 	])) as [string, StuffERC721.Stuff];
 
-	const pixels = decodeCanvasToPixels(stuff.canvas, project.collection.palette);
+	const pixels = decodeCanvasToPixels(stuff.canvas, stuffCollection.blueprint.palette);
 
 	return (
 		<Container>
@@ -97,21 +107,24 @@ const Page = async ({
 
 				<Box className="grid gap-4">
 					<Box className="grid gap-2">
-						<Box className="text-4xl">{stuff.title || `${project.collection.sku} #${tokenId.toString()}`}</Box>
+						<Box className="text-4xl">
+							{stuff.title || `${stuffCollection.blueprint.sku} #${tokenId.toString()}`}
+						</Box>
 						<Box className="text-sm text-muted-foreground">
-							{stuff.description || `Minted item #${tokenId.toString()} from ${project.collection.sku}.`}
+							{stuff.description ||
+								`Minted item #${tokenId.toString()} from ${stuffCollection.blueprint.sku}.`}
 						</Box>
 					</Box>
 
 					<Box className="grid gap-2 text-sm">
-						<Meta label="Collection" value={project.collection.sku} />
-						<Meta label="Category" value={project.collection.category} />
+						<Meta label="Collection" value={stuffCollection.blueprint.sku} />
+						<Meta label="Category" value={stuffCollection.blueprint.category} />
 						<Meta label="Author" value={stuff.author || "-"} />
 						<Meta label="Owner" value={owner} breakAll />
 						<Meta label="Token" value={`#${tokenId.toString()}`} />
 						<Meta
 							label="Mint price"
-							value={Beaut.money(Number(Beaut.bigint(project.collection.mintPriceToken, 6)))}
+							value={Beaut.money(Number(Beaut.bigint(stuffCollection.blueprint.mintPriceToken, 6)))}
 						/>
 					</Box>
 

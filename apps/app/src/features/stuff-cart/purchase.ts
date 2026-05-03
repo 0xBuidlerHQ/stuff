@@ -2,7 +2,7 @@
 
 import type { Address, Hex } from "viem";
 import { toHex } from "viem";
-import type { ProductConfiguration } from "@/features/product-configurator/store";
+import type { StuffConfiguration } from "@/features/stuff-configurator/provider";
 
 const erc3009MetadataAbi = [
 	{
@@ -71,9 +71,9 @@ type MintRelayRequest = {
 	};
 };
 
-const getMintCanvas = (configuration: ProductConfiguration) => {
+const getMintCanvas = (configuration: StuffConfiguration) => {
 	const paletteIndexByColor = new Map(
-		configuration.collection.palette.map((color, index) => [color, index] as const),
+		configuration.blueprint.palette.map((color, index) => [color, index] as const),
 	);
 	const paletteIndexes = configuration.design.pixels.map((color) => {
 		const paletteIndex = paletteIndexByColor.get(color);
@@ -88,8 +88,8 @@ const getMintCanvas = (configuration: ProductConfiguration) => {
 	return toHex(Uint8Array.from(paletteIndexes));
 };
 
-const getMintOptions = (configuration: ProductConfiguration) => {
-	return configuration.collection.options.map(([name]) => {
+const getMintOptions = (configuration: StuffConfiguration) => {
+	return configuration.blueprint.options.map(([name]) => {
 		const value = configuration.selectedOptions[name];
 
 		if (!value) {
@@ -100,7 +100,7 @@ const getMintOptions = (configuration: ProductConfiguration) => {
 	});
 };
 
-const getMintParams = (configuration: ProductConfiguration) => ({
+const getMintParams = (configuration: StuffConfiguration) => ({
 	author: configuration.author,
 	canvas: getMintCanvas(configuration),
 	description: configuration.description,
@@ -144,7 +144,7 @@ const getMintRelayRequest = ({
 }: {
 	authorization: MintAuthorization;
 	chainId: number;
-	configuration: ProductConfiguration;
+	configuration: StuffConfiguration;
 	owner: Address;
 }): MintRelayRequest => ({
 	chainId,

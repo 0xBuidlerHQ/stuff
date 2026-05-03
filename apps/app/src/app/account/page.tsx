@@ -1,16 +1,11 @@
-import { AccountPage, type AccountProject } from "@/features/account/account-page";
-import { getFactoryProjects } from "@/features/product-catalog";
+import { env } from "@/config/env";
+import { AccountPage } from "@/features/account/account-page";
+import { getStuffs } from "@/features/stuff/getStuffs";
 
 const Page = async () => {
-	const projects = await getFactoryProjects();
+	const stuffs = await getStuffs({ chainId: env.CHAIN_ID as any });
 
-	const accountProjects: AccountProject[] = projects.map((project) => ({
-		slug: project.slug,
-		stuffAddress: project.stuffAddress,
-		collection: project.collection,
-	}));
-
-	return <AccountPage projects={accountProjects} />;
+	return <AccountPage stuffs={stuffs} />;
 };
 
 export default Page;

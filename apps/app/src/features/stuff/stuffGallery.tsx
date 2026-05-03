@@ -5,11 +5,11 @@ import { useState } from "react";
 import type { Stuff } from "@/features/stuff/type";
 import { Box } from "@/primitives/box";
 
-type ProductGalleryProps = {
+type StuffGalleryProps = {
 	stuff: Stuff;
 };
 
-const StuffGalery = ({ stuff }: ProductGalleryProps) => {
+const StuffGallery = ({ stuff }: StuffGalleryProps) => {
 	const images = stuff.assets.images;
 
 	const [selectedIndex, setSelectedIndex] = useState(0);
@@ -59,4 +59,4 @@ const StuffGalery = ({ stuff }: ProductGalleryProps) => {
 	);
 };
 
-export { StuffGalery };
+export { StuffGallery };

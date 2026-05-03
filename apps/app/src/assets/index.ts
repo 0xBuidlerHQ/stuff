@@ -2,13 +2,13 @@ import type { StaticImageData } from "next/image";
 
 import stuff00000Img from "./stuff-00000/img.png";
 
-type ProductAssets = {
+type StuffAssets = {
 	images: StaticImageData[];
 	description: string;
 	information: string[][];
 };
 
-const productAssetsBySku: Record<string, ProductAssets> = {
+const stuffAssetsBySku: Record<string, StuffAssets> = {
 	"stuff-00000": {
 		images: [
 			stuff00000Img,
@@ -30,9 +30,9 @@ const productAssetsBySku: Record<string, ProductAssets> = {
 	},
 };
 
-const getProductAssets = (sku: string): ProductAssets | undefined => {
-	return productAssetsBySku[sku];
+const getStuffAssets = (sku: string): StuffAssets | undefined => {
+	return stuffAssetsBySku[sku];
 };
 
-export type { ProductAssets };
-export { getProductAssets, productAssetsBySku };
+export type { StuffAssets };
+export { getStuffAssets, stuffAssetsBySku };

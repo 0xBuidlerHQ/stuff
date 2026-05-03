@@ -3,7 +3,7 @@ import type { StuffERC721 } from "@0xhq/stuff.contracts/types.user";
 import { cache } from "react";
 import type { Address } from "viem";
 import { multicall, readContract } from "wagmi/actions";
-import { getProductAssets } from "@/assets";
+import { getStuffAssets } from "@/assets";
 import type { Stuff } from "@/features/stuff/type";
 import { wagmiConfig } from "@/providers/wagmi.config";
 
@@ -51,10 +51,11 @@ const getStuffs = cache(async (options: GetStuffsOptions) => {
 		const address = stuffAddresses[index];
 		const blueprint = stuffBlueprints[index];
 
-		const assets = getProductAssets(blueprint.sku);
+		const assets = getStuffAssets(blueprint.sku);
 
 		return {
 			slug: blueprint.sku,
+			//
 			id,
 			assets,
 			blueprint,

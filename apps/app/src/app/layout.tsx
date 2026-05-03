@@ -5,7 +5,6 @@ import { headers } from "next/headers";
 import { cookieToInitialState } from "wagmi";
 import { geistSans, interSans, tronicaMono, unbounded } from "@/config/fonts";
 import { Footer } from "@/layouts/footer";
-import { Globals } from "@/layouts/globals";
 import { Header } from "@/layouts/header";
 import { RouteLabel } from "@/layouts/route-label";
 import { Box } from "@/primitives/box";
@@ -51,9 +50,6 @@ export default async function RootLayout({
 					</main>
 
 					<Footer />
-
-					{/*  */}
-					<Globals />
 				</Providers>
 			</body>
 		</html>

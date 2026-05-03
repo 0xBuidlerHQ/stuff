@@ -1,27 +1,24 @@
-import { getFactoryProjects } from "@/features/product-catalog";
-import { getWallPieces, ProductWallSection } from "@/features/product-wall";
+import { env } from "@/config/env";
+import { getWallPieces } from "@/features/stuff-wall/get-wall-pieces";
+import { StuffWallSection } from "@/features/stuff-wall/wall";
+import { getStuffs } from "@/features/stuff/getStuffs";
 import { Box } from "@/primitives/box";
 import { Container } from "@/primitives/container";
 
 const Page = async () => {
-	const projects = await getFactoryProjects();
-	const projectsWithPieces = await Promise.all(
-		projects.map(async (project) => ({
-			...project,
-			pieces: await getWallPieces(project.stuffAddress, project.collection),
+	const stuffs = await getStuffs({ chainId: env.CHAIN_ID as any });
+	const stuffSections = await Promise.all(
+		stuffs.map(async (stuff) => ({
+			stuff,
+			pieces: await getWallPieces(stuff.address, stuff.blueprint),
 		})),
 	);
 
 	return (
 		<Container>
 			<Box className="grid gap-12">
-				{projectsWithPieces.map((project) => (
-					<ProductWallSection
-						key={project.stuffAddress}
-						collection={project.collection}
-						pieces={project.pieces}
-						slug={project.slug}
-					/>
+				{stuffSections.map(({ stuff, pieces }) => (
+					<StuffWallSection key={stuff.address} stuff={stuff} pieces={pieces} />
 				))}
 			</Box>
 		</Container>

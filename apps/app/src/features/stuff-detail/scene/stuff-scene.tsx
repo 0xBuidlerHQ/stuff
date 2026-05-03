@@ -13,7 +13,7 @@ type ScenePrimitiveProps = {
 	sku: string;
 };
 
-type ProductSceneProps = {
+type StuffSceneProps = {
 	sku: string;
 };
 
@@ -21,13 +21,13 @@ const ScenePrimitive = ({ sku }: ScenePrimitiveProps) => {
 	return (
 		<Float>
 			<Center>
-				<Model rotation={[0, 3.1, 0]} sku={sku} />
+				<Model rotation={[0, 3.1, 0]} />
 			</Center>
 		</Float>
 	);
 };
 
-const ProductScene = ({ sku }: ProductSceneProps) => {
+const StuffScene = ({ sku }: StuffSceneProps) => {
 	return (
 		<Box className="relative h-full w-full">
 			<SceneOverlay />
@@ -42,4 +42,4 @@ const ProductScene = ({ sku }: ProductSceneProps) => {
 	);
 };
 
-export { ProductScene };
+export { StuffScene };

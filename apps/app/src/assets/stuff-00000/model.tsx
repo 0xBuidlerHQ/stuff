@@ -21,7 +21,6 @@ import {
 	Vector3,
 } from "three";
 import type { GLTF } from "three-stdlib";
-import { useProductConfiguratorStore } from "@/features/product-configurator/store";
 
 type GLTFResult = GLTF & {
 	nodes: {
@@ -36,7 +35,8 @@ type GLTFResult = GLTF & {
 };
 
 type ModelProps = JSX.IntrinsicElements["group"] & {
-	sku?: string;
+	pixels?: string[];
+	size?: number;
 };
 
 const createProjectedPatchGeometry = (source: THREE.BufferGeometry) => {
@@ -77,21 +77,17 @@ const createProjectedPatchGeometry = (source: THREE.BufferGeometry) => {
 	return geometry;
 };
 
-export function Model({ sku, ...props }: ModelProps) {
-	const configuration = useProductConfiguratorStore((state) =>
-		sku ? state.configurationsBySku[sku] : undefined,
-	);
+export function Model({ pixels, size = 42, ...props }: ModelProps) {
 	const { nodes, materials } = useGLTF(MODEL_PATH) as unknown as GLTFResult;
 	const patchGeometry = useMemo(
 		() => createProjectedPatchGeometry(nodes.Embroidery_Patch.geometry),
 		[nodes.Embroidery_Patch.geometry],
 	);
 	const patchTexture = useMemo(() => {
-		if (!configuration?.design) {
+		if (!pixels) {
 			return null;
 		}
 
-		const { pixels, size } = configuration.design;
 		const canvas = document.createElement("canvas");
 		canvas.width = size;
 		canvas.height = size;
@@ -117,7 +113,7 @@ export function Model({ sku, ...props }: ModelProps) {
 		texture.needsUpdate = true;
 
 		return texture;
-	}, [configuration]);
+	}, [pixels, size]);
 
 	useEffect(() => {
 		return () => {

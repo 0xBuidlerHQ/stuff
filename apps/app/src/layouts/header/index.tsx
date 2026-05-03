@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Img from "@/app/icon.svg";
 import { links } from "@/config/links";
+import { CartButton } from "@/features/stuff-cart/cart-button";
 import { ConnectButton } from "@/features/web3/connectButton";
 import { WorldClock } from "@/layouts/header/world-clock";
 import { Box } from "@/primitives/box";
@@ -40,7 +41,8 @@ const Header = () => {
 					</Box>
 				</Box>
 
-				<Box>
+				<Box className="flex items-center gap-4">
+					<CartButton />
 					<ConnectButton />
 				</Box>
 			</Box>

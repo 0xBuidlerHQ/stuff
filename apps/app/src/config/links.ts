@@ -19,6 +19,10 @@ const links = {
 		name: "account",
 		url: "/account",
 	},
+	cart: {
+		name: "cart",
+		url: "/cart",
+	},
 	about: {
 		name: "about",
 		url: "/about",
