@@ -11,7 +11,7 @@
 		"./deployments.json": "./deployments/deployments.json"
 	},
 	"scripts": {
-		"dev": "(sleep 5 && make deploy && pnpm build) & make dev",
+		"dev": "(sleep 5 && make clean && make deploy && pnpm build) & make dev",
 		"build": "pnpm build-contract && pnpm build-wagmi && pnpm build-types",
 		"build-contract": "make build",
 		"build-wagmi": "pnpm wagmi generate",

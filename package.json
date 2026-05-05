@@ -2,8 +2,8 @@
 	"name": "@0xhq/stuff",
 	"private": true,
 	"scripts": {
-		"build": "turbo run build",
 		"dev": "turbo run dev",
+		"build": "turbo run build",
 		"start": "turbo run start"
 	},
 	"devDependencies": {

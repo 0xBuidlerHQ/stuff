@@ -1,9 +1,10 @@
 "use client";
 
-import { Loader2, LogOutIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { usePathname } from "next/navigation";
 import { links } from "@/config/links";
-import { NavigationItem } from "@/layouts/header";
+import { NavigationItem } from "@/layouts/header/navigation";
 import { Box } from "@/primitives/box";
 import { Button } from "@/primitives/button";
 import { useWeb3 } from "@/providers/web3";
@@ -23,16 +24,23 @@ const LoadingButton = () => {
 	);
 };
 
+const NavigationItems = [links.cart, links.account];
+
 const ConnectedButton = () => {
-	const { disconnect } = useWeb3();
+	const pathname = usePathname();
 
 	return (
 		<Box className="flex gap-2 h-8 items-center text-sm font-medium">
-			<NavigationItem {...links.account} />
+			{NavigationItems.map((navigationItem) => {
+				const isActive =
+					pathname === navigationItem.url || pathname.startsWith(`${navigationItem.url}/`);
 
-			<Button onClick={disconnect}>
+				return <NavigationItem key={navigationItem.name} isActive={isActive} {...navigationItem} />;
+			})}
+
+			{/* <Button onClick={disconnect}>
 				<LogOutIcon className="size-4" />
-			</Button>
+			</Button> */}
 		</Box>
 	);
 };

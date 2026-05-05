@@ -22,8 +22,12 @@ ANVIL_DEV_FLAGS=--fork-url $(ALCHEMY_BASE_RPC) --mnemonic $(ANVIL_MNEMONIC) --ch
 dev:
 	anvil $(ANVIL_DEV_FLAGS)
 
+.PHONY: clean
+clean:
+	forge clean
+
 .PHONY: build
-build:
+build: 
 	forge build
 
 FORGE_DEPLOY_FLAGS=--rpc-url $(LOCAL_RPC) --broadcast

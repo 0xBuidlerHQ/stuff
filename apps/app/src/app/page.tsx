@@ -1,7 +1,6 @@
-import { Container } from "@/primitives/container";
+import { redirect } from "next/navigation";
+import { links } from "@/config/links";
 
-const Homepage = () => {
-	return <Container className="h-full">La</Container>;
-};
+const Homepage = () => redirect(links.stuffs.url);
 
 export default Homepage;

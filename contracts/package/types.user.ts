@@ -2,7 +2,7 @@
 export type Address = string;
 export type Bytes = string;
 
-export namespace StuffERC721 {
+export namespace StuffCollectionERC721 {
 	export type MintAuthorization = {
 		from: Address;
 		validAfter: bigint;
@@ -11,26 +11,6 @@ export namespace StuffERC721 {
 		v: number;
 		r: Bytes;
 		s: Bytes;
-	};
-	export type Stuff = {
-		author: string;
-		authorAddress: Address;
-		title: string;
-		description: string;
-		creationDate: bigint;
-		canvas: Bytes;
-		options: Array<Array<string>>;
-	};
-	export type StuffBlueprint = {
-		sku: string;
-		category: string;
-		metadataURI: string;
-		palette: Array<string>;
-		options: Array<Array<string>>;
-		paymentToken: Address;
-		paymentRecipient: Address;
-		maxSupply: bigint;
-		mintPriceToken: bigint;
 	};
 	export type StuffCollection = {
 		sku: string;
@@ -43,7 +23,17 @@ export namespace StuffERC721 {
 		maxSupply: bigint;
 		mintPriceToken: bigint;
 	};
-	export type StuffMintParams = {
+	export type StuffItem = {
+		id: bigint;
+		author: string;
+		authorAddress: Address;
+		title: string;
+		description: string;
+		creationDate: bigint;
+		canvas: Bytes;
+		options: Array<Array<string>>;
+	};
+	export type StuffItemMintParams = {
 		author: string;
 		title: string;
 		description: string;

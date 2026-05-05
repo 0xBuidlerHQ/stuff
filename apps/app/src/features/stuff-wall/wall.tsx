@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { links } from "@/config/links";
+import type { Stuff, WallPiece } from "@/features/stuff/types";
 import { GridPreview } from "@/features/stuff-configurator/grid";
-import type { WallPiece } from "@/features/stuff-wall/get-wall-pieces";
-import type { Stuff } from "@/features/stuff/type";
 import { Box } from "@/primitives/box";
 import { Container } from "@/primitives/container";
 
@@ -36,12 +35,16 @@ const StuffWallSection = ({ stuff, pieces }: StuffWallProps) => {
 	return (
 		<Box className="grid gap-4">
 			<Box className="grid gap-2">
-				<Box className="text-4xl">{stuff.blueprint.sku}</Box>
+				<Box className="text-4xl">{stuff.sku}</Box>
 			</Box>
 
 			<Box className="grid grid-cols-2 gap-4 desktop:grid-cols-6">
 				{pieces.map((piece) => (
-					<WallPieceCard key={`${stuff.slug}-${piece.tokenId.toString()}`} piece={piece} stuff={stuff} />
+					<WallPieceCard
+						key={`${stuff.slug}-${piece.tokenId.toString()}`}
+						piece={piece}
+						stuff={stuff}
+					/>
 				))}
 			</Box>
 		</Box>

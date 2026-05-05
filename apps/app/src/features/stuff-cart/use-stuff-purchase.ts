@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { parseSignature } from "viem";
 import type { Address } from "viem";
+import { parseSignature } from "viem";
 import { useConfig, useWalletClient } from "wagmi";
 import { readContract } from "wagmi/actions";
-import type { StuffConfiguration } from "@/features/stuff-configurator/provider";
+import type { StuffConfiguration } from "@/features/stuff/types";
 import { useWeb3 } from "@/providers/web3";
 import {
 	erc3009MetadataAbi,
@@ -47,7 +47,7 @@ const useStuffPurchase = (
 			setErrorMessage(null);
 
 			const owner = eoa.address as Address;
-			const paymentToken = configuration.blueprint.paymentToken as Address;
+			const paymentToken = configuration.stuff.paymentToken as Address;
 			const [name, version, balance] = await Promise.all([
 				readContract(config, {
 					abi: erc3009MetadataAbi,
@@ -67,14 +67,14 @@ const useStuffPurchase = (
 				}),
 			]);
 
-			if (balance < configuration.blueprint.mintPriceToken) {
+			if (balance < configuration.stuff.mintPriceToken) {
 				throw new Error("Insufficient USDC balance for this mint.");
 			}
 
 			const message = getReceiveWithAuthorizationMessage({
 				from: owner,
-				stuffAddress: configuration.stuffAddress,
-				value: configuration.blueprint.mintPriceToken,
+				stuffAddress: configuration.stuff.address,
+				value: configuration.stuff.mintPriceToken,
 			});
 
 			const signature = await walletClient.signTypedData({

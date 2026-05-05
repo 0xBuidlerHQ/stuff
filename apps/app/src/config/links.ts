@@ -15,6 +15,10 @@ const links = {
 		name: "culture",
 		url: "/culture",
 	},
+	impact: {
+		name: "impact",
+		url: "/impact",
+	},
 	account: {
 		name: "account",
 		url: "/account",

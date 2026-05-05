@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import type { Stuff } from "@/features/stuff/type";
+import type { Stuff } from "@/features/stuff/types";
 import { Box } from "@/primitives/box";
 
 type StuffGalleryProps = {

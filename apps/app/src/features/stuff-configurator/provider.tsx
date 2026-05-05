@@ -9,24 +9,9 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { links } from "@/config/links";
+import type { Stuff, StuffConfiguration } from "@/features/stuff/types";
 import { useStuffCartStore } from "@/features/stuff-cart/store";
-import type { Stuff } from "@/features/stuff/type";
 import { getDefaultPixels } from "./grid";
-
-type StuffConfiguration = {
-	sku: string;
-	stuffAddress: Stuff["address"];
-	blueprint: Stuff["blueprint"];
-	author: string;
-	title: string;
-	description: string;
-	design: {
-		size: number;
-		pixels: string[];
-	};
-	selectedOptions: Record<string, string>;
-};
 
 type StuffConfiguratorContextValue = {
 	configuration: StuffConfiguration;
@@ -40,8 +25,8 @@ const GRID_SIZE = 42;
 const StuffConfiguratorContext = createContext<StuffConfiguratorContextValue | null>(null);
 
 const createDefaultConfiguration = (stuff: Stuff): StuffConfiguration => {
-	const { blueprint, address } = stuff;
-	const { palette, sku } = blueprint;
+	const { blueprint } = stuff;
+	const { palette } = blueprint;
 
 	return {
 		author: "",
@@ -55,17 +40,12 @@ const createDefaultConfiguration = (stuff: Stuff): StuffConfiguration => {
 			size: GRID_SIZE,
 		},
 		selectedOptions: {},
-		blueprint,
-		sku,
-		stuffAddress: address,
+		stuff,
 		title: "",
 	};
 };
 
-const StuffConfiguratorProvider = ({
-	children,
-	stuff,
-}: PropsWithChildren<{ stuff: Stuff }>) => {
+const StuffConfiguratorProvider = ({ children, stuff }: PropsWithChildren<{ stuff: Stuff }>) => {
 	const router = useRouter();
 	const addItem = useStuffCartStore((state) => state.addItem);
 	const [configuration, setConfiguration] = useState<StuffConfiguration>(() =>
@@ -77,8 +57,8 @@ const StuffConfiguratorProvider = ({
 	}, [stuff]);
 
 	const requiredOptionNames = useMemo(
-		() => configuration.blueprint.options.map(([name]) => name),
-		[configuration.blueprint.options],
+		() => configuration.stuff.options.map(([name]) => name),
+		[configuration.stuff.options],
 	);
 	const isConfigurationComplete =
 		configuration.author.trim().length > 0 &&
@@ -99,21 +79,15 @@ const StuffConfiguratorProvider = ({
 			addToCart: () => {
 				if (!isConfigurationComplete) return;
 
-				addItem({
-					id: crypto.randomUUID(),
-					stuff,
-					configuration,
-				});
-				router.push(links.cart.url);
+				addItem(configuration);
+				// router.push(links.cart.url);
 			},
 		}),
 		[addItem, configuration, isConfigurationComplete, router, stuff],
 	);
 
 	return (
-		<StuffConfiguratorContext.Provider value={value}>
-			{children}
-		</StuffConfiguratorContext.Provider>
+		<StuffConfiguratorContext.Provider value={value}>{children}</StuffConfiguratorContext.Provider>
 	);
 };
 
@@ -127,5 +101,4 @@ const useStuffConfigurator = () => {
 	return context;
 };
 
-export type { StuffConfiguration };
 export { StuffConfiguratorProvider, useStuffConfigurator };

@@ -5,10 +5,9 @@ import { notFound } from "next/navigation";
 
 import Img from "@/app/icon.svg";
 import { env } from "@/config/env";
-import { StuffConfigurator } from "@/features/stuff-configurator/stuff-configurator";
-
 import { getStuffs } from "@/features/stuff/getStuffs";
 import { StuffGallery } from "@/features/stuff/stuffGallery";
+import { StuffConfigurator } from "@/features/stuff-configurator/stuff-configurator";
 
 import { Box } from "@/primitives/box";
 import { Container } from "@/primitives/container";
@@ -36,12 +35,12 @@ const StuffPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 						<Box className="flex flex-col gap-2">
 							<Box className="flex items-center justify-between gap-4">
 								<Box className="flex items-center gap-2">
-									<h1 className="text-5xl">{stuff.blueprint.sku}</h1>
+									<h1 className="text-5xl">{stuff.sku}</h1>
 								</Box>
 
 								<Box>
 									<h1 className="text-2xl pl-1 pr-2 pt-1 bg-foreground text-background inline">
-										{Beaut.money(Number(Beaut.bigint(stuff.blueprint.mintPriceToken, 6)))}
+										{Beaut.money(Number(Beaut.bigint(stuff.mintPriceToken, 6)))}
 									</h1>
 								</Box>
 							</Box>

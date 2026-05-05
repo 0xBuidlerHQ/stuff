@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { env } from "@/config/env";
+import { getStuffs } from "@/features/stuff/getStuffs";
 import { getWallPieces } from "@/features/stuff-wall/get-wall-pieces";
 import { StuffWall } from "@/features/stuff-wall/wall";
-import { getStuffs } from "@/features/stuff/getStuffs";
 
 export const dynamicParams = false;
 export const generateStaticParams = async () => {
@@ -17,7 +17,7 @@ const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
 
 	if (!stuff) notFound();
 
-	const pieces = await getWallPieces(stuff.address, stuff.blueprint);
+	const pieces = await getWallPieces(stuff);
 
 	return <StuffWall stuff={stuff} pieces={pieces} />;
 };

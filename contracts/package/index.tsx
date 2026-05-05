@@ -796,30 +796,6 @@ export const ierc3009Abi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// IERC3009Receiver
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const ierc3009ReceiverAbi = [
-  {
-    type: 'function',
-    inputs: [
-      { name: 'from', internalType: 'address', type: 'address' },
-      { name: 'to', internalType: 'address', type: 'address' },
-      { name: 'value', internalType: 'uint256', type: 'uint256' },
-      { name: 'validAfter', internalType: 'uint256', type: 'uint256' },
-      { name: 'validBefore', internalType: 'uint256', type: 'uint256' },
-      { name: 'nonce', internalType: 'bytes32', type: 'bytes32' },
-      { name: 'v', internalType: 'uint8', type: 'uint8' },
-      { name: 'r', internalType: 'bytes32', type: 'bytes32' },
-      { name: 's', internalType: 'bytes32', type: 'bytes32' },
-    ],
-    name: 'receiveWithAuthorization',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IERC721Enumerable
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1499,63 +1475,6 @@ export const iMulticall3Abi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Ownable
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const ownableAbi = [
-  {
-    type: 'function',
-    inputs: [],
-    name: 'owner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'renounceOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
-    name: 'transferOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'OwnershipTransferred',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
-    name: 'OwnableInvalidOwner',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
-    name: 'OwnableUnauthorizedAccount',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SafeCast
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1627,21 +1546,17 @@ export const stringsAbi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// StuffERC721
+// StuffCollectionERC721
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x176701A02AD3B00a8BF51a066E96252675B00258)
- * -
- */
-export const stuffErc721Abi = [
+export const stuffCollectionErc721Abi = [
   {
     type: 'constructor',
     inputs: [
       { name: '_stuffId', internalType: 'uint256', type: 'uint256' },
       {
-        name: '_stuffBlueprint',
-        internalType: 'struct StuffERC721.StuffBlueprint',
+        name: '_stuffCollection',
+        internalType: 'struct StuffCollectionERC721.StuffCollection',
         type: 'tuple',
         components: [
           { name: 'sku', internalType: 'string', type: 'string' },
@@ -1722,34 +1637,12 @@ export const stuffErc721Abi = [
   },
   {
     type: 'function',
-    inputs: [{ name: '_tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'getStuff',
-    outputs: [
-      {
-        name: 'stuff',
-        internalType: 'struct StuffERC721.Stuff',
-        type: 'tuple',
-        components: [
-          { name: 'author', internalType: 'string', type: 'string' },
-          { name: 'authorAddress', internalType: 'address', type: 'address' },
-          { name: 'title', internalType: 'string', type: 'string' },
-          { name: 'description', internalType: 'string', type: 'string' },
-          { name: 'creationDate', internalType: 'uint256', type: 'uint256' },
-          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
-          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
-        ],
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     inputs: [],
-    name: 'getStuffBlueprint',
+    name: 'getStuffCollection',
     outputs: [
       {
-        name: 'stuffBlueprint',
-        internalType: 'struct StuffERC721.StuffBlueprint',
+        name: 'stuffCollection',
+        internalType: 'struct StuffCollectionERC721.StuffCollection',
         type: 'tuple',
         components: [
           { name: 'sku', internalType: 'string', type: 'string' },
@@ -1777,6 +1670,31 @@ export const stuffErc721Abi = [
   {
     type: 'function',
     inputs: [
+      { name: '_stuffItemId', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getStuffItem',
+    outputs: [
+      {
+        name: 'stuff',
+        internalType: 'struct StuffCollectionERC721.StuffItem',
+        type: 'tuple',
+        components: [
+          { name: 'id', internalType: 'uint256', type: 'uint256' },
+          { name: 'author', internalType: 'string', type: 'string' },
+          { name: 'authorAddress', internalType: 'address', type: 'address' },
+          { name: 'title', internalType: 'string', type: 'string' },
+          { name: 'description', internalType: 'string', type: 'string' },
+          { name: 'creationDate', internalType: 'uint256', type: 'uint256' },
+          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
+        ],
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
       { name: 'owner', internalType: 'address', type: 'address' },
       { name: 'operator', internalType: 'address', type: 'address' },
     ],
@@ -1790,7 +1708,7 @@ export const stuffErc721Abi = [
       { name: '_to', internalType: 'address', type: 'address' },
       {
         name: '_params',
-        internalType: 'struct StuffERC721.StuffMintParams',
+        internalType: 'struct StuffCollectionERC721.StuffItemMintParams',
         type: 'tuple',
         components: [
           { name: 'author', internalType: 'string', type: 'string' },
@@ -1811,7 +1729,7 @@ export const stuffErc721Abi = [
       { name: '_to', internalType: 'address', type: 'address' },
       {
         name: '_params',
-        internalType: 'struct StuffERC721.StuffMintParams',
+        internalType: 'struct StuffCollectionERC721.StuffItemMintParams',
         type: 'tuple',
         components: [
           { name: 'author', internalType: 'string', type: 'string' },
@@ -1823,7 +1741,7 @@ export const stuffErc721Abi = [
       },
       {
         name: '_authorization',
-        internalType: 'struct StuffERC721.MintAuthorization',
+        internalType: 'struct StuffCollectionERC721.MintAuthorization',
         type: 'tuple',
         components: [
           { name: 'from', internalType: 'address', type: 'address' },
@@ -1837,7 +1755,9 @@ export const stuffErc721Abi = [
       },
     ],
     name: 'mintWithAuthorization',
-    outputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
+    outputs: [
+      { name: 'stuffItemId', internalType: 'uint256', type: 'uint256' },
+    ],
     stateMutability: 'nonpayable',
   },
   {
@@ -2073,6 +1993,7 @@ export const stuffErc721Abi = [
     type: 'event',
     anonymous: false,
     inputs: [
+      { name: 'to', internalType: 'address', type: 'address', indexed: true },
       {
         name: 'tokenId',
         internalType: 'uint256',
@@ -2080,19 +2001,23 @@ export const stuffErc721Abi = [
         indexed: true,
       },
       {
-        name: 'authorAddress',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'canvasHash',
-        internalType: 'bytes32',
-        type: 'bytes32',
+        name: 'stuffItem',
+        internalType: 'struct StuffCollectionERC721.StuffItem',
+        type: 'tuple',
+        components: [
+          { name: 'id', internalType: 'uint256', type: 'uint256' },
+          { name: 'author', internalType: 'string', type: 'string' },
+          { name: 'authorAddress', internalType: 'address', type: 'address' },
+          { name: 'title', internalType: 'string', type: 'string' },
+          { name: 'description', internalType: 'string', type: 'string' },
+          { name: 'creationDate', internalType: 'uint256', type: 'uint256' },
+          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
+        ],
         indexed: false,
       },
     ],
-    name: 'StuffCreated',
+    name: 'StuffItemCreated',
   },
   {
     type: 'event',
@@ -2221,39 +2146,17 @@ export const stuffErc721Abi = [
   { type: 'error', inputs: [], name: 'Unauthorized' },
 ] as const
 
-/**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x176701A02AD3B00a8BF51a066E96252675B00258)
- * -
- */
-export const stuffErc721Address = {
-  8453: '0x176701A02AD3B00a8BF51a066E96252675B00258',
-  31337: '0xE9e10cc305f675862298e9684876f7d73f3a81B9',
-} as const
-
-/**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x176701A02AD3B00a8BF51a066E96252675B00258)
- * -
- */
-export const stuffErc721Config = {
-  address: stuffErc721Address,
-  abi: stuffErc721Abi,
-} as const
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// StuffFactory
+// StuffCollectionFactory
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940)
- * -
- */
-export const stuffFactoryAbi = [
+export const stuffCollectionFactoryAbi = [
   {
     type: 'function',
     inputs: [
       {
-        name: '_stuffBlueprint',
-        internalType: 'struct StuffERC721.StuffBlueprint',
+        name: '_stuffCollection',
+        internalType: 'struct StuffCollectionERC721.StuffCollection',
         type: 'tuple',
         components: [
           { name: 'sku', internalType: 'string', type: 'string' },
@@ -2278,26 +2181,34 @@ export const stuffFactoryAbi = [
       { name: '_owner', internalType: 'address', type: 'address' },
       { name: '_relayer', internalType: 'address', type: 'address' },
     ],
-    name: 'createStuffERC721',
+    name: 'createStuffCollectionERC721',
     outputs: [
-      { name: 'stuff', internalType: 'contract StuffERC721', type: 'address' },
+      {
+        name: 'newStuffCollection',
+        internalType: 'contract StuffCollectionERC721',
+        type: 'address',
+      },
     ],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    name: 'stuffCollection',
+    outputs: [
+      {
+        name: '',
+        internalType: 'contract StuffCollectionERC721',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
   },
   {
     type: 'function',
     inputs: [],
     name: 'stuffIdsIndex',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    name: 'stuffs',
-    outputs: [
-      { name: '', internalType: 'contract StuffERC721', type: 'address' },
-    ],
     stateMutability: 'view',
   },
   {
@@ -2316,25 +2227,32 @@ export const stuffFactoryAbi = [
         type: 'address',
         indexed: true,
       },
+      {
+        name: 'stuffCollection',
+        internalType: 'struct StuffCollectionERC721.StuffCollection',
+        type: 'tuple',
+        components: [
+          { name: 'sku', internalType: 'string', type: 'string' },
+          { name: 'category', internalType: 'string', type: 'string' },
+          { name: 'metadataURI', internalType: 'string', type: 'string' },
+          { name: 'palette', internalType: 'string[]', type: 'string[]' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
+          {
+            name: 'paymentToken',
+            internalType: 'contract IERC20',
+            type: 'address',
+          },
+          {
+            name: 'paymentRecipient',
+            internalType: 'address',
+            type: 'address',
+          },
+          { name: 'maxSupply', internalType: 'uint256', type: 'uint256' },
+          { name: 'mintPriceToken', internalType: 'uint256', type: 'uint256' },
+        ],
+        indexed: false,
+      },
     ],
-    name: 'StuffERC721Created',
+    name: 'StuffCollectionERC721Created',
   },
 ] as const
-
-/**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940)
- * -
- */
-export const stuffFactoryAddress = {
-  8453: '0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940',
-  31337: '0x60dcA26eeeEA11aA9a5B053abC75708Af44273a6',
-} as const
-
-/**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x9F835E17F02Ca6D08Cb747302508b6CCBbe25940)
- * -
- */
-export const stuffFactoryConfig = {
-  address: stuffFactoryAddress,
-  abi: stuffFactoryAbi,
-} as const

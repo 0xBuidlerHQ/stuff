@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from "react";
+import { PonderProvider } from "@/providers/ponder";
 import { QueryProvider } from "@/providers/query";
 import { WagmiProvider, type WagmiProviderProps } from "@/providers/wagmi";
 import { Web3Provider } from "@/providers/web3";
@@ -17,7 +18,9 @@ const LogicProviders = ({ children, initialState }: PropsWithChildren & WagmiPro
 	return (
 		<QueryProvider>
 			<WagmiProvider initialState={initialState}>
-				<Web3Provider>{children}</Web3Provider>
+				<PonderProvider>
+					<Web3Provider>{children}</Web3Provider>
+				</PonderProvider>
 			</WagmiProvider>
 		</QueryProvider>
 	);

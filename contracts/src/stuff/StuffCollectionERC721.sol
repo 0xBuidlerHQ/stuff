@@ -22,9 +22,9 @@ interface IERC3009 {
 }
 
 /**
- * @dev StuffERC721.
+ * @dev StuffCollectionERC721.
  */
-contract StuffERC721 is ERC721, ERC721Enumerable {
+contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
     using SafeERC20 for IERC20;
 
     /**
@@ -40,9 +40,9 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     uint256 public constant CANVAS_SIZE = CANVAS_WIDTH * CANVAS_HEIGHT;
 
     /**
-     * @dev Struct StuffBlueprint.
+     * @dev Struct StuffCollection.
      */
-    struct StuffBlueprint {
+    struct StuffCollection {
         string sku;
         string category;
         string metadataURI;
@@ -56,9 +56,9 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     }
 
     /**
-     * @dev Struct StuffMintParams.
+     * @dev Struct StuffItemMintParams.
      */
-    struct StuffMintParams {
+    struct StuffItemMintParams {
         string author;
 
         string title;
@@ -81,9 +81,10 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     }
 
     /**
-     * @dev Struct Stuff.
+     * @dev Struct StuffItem.
      */
-    struct Stuff {
+    struct StuffItem {
+        uint256 id;
         string author;
         address authorAddress;
 
@@ -121,15 +122,15 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     /**
      * @dev Mappings.
      */
-    mapping(uint256 => Stuff) private _stuffs;
+    mapping(uint256 => StuffItem) private _stuffItems;
 
     /**
      * @dev Events.
      */
-    event StuffCreated(uint256 indexed tokenId, address indexed authorAddress, bytes32 canvasHash);
-    event MetadataURIUpdated(string metadataURI);
+    event StuffItemCreated(address indexed to, uint256 indexed tokenId, StuffItem stuffItem);
     event OwnerUpdated(address indexed owner);
     event RelayerUpdated(address indexed relayer);
+    event MetadataURIUpdated(string metadataURI);
 
     /**
      * @dev Errors.
@@ -160,23 +161,24 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
         _;
     }
 
-    constructor(uint256 _stuffId, StuffBlueprint memory _stuffBlueprint, address _owner, address _relayer)
+    constructor(uint256 _stuffId, StuffCollection memory _stuffCollection, address _owner, address _relayer)
         ERC721(
             string(abi.encodePacked("stuff#", Strings.toString(_stuffId))),
             string(abi.encodePacked("STUFF#", Strings.toString(_stuffId)))
         )
     {
         if (
-            bytes(_stuffBlueprint.category).length == 0 || bytes(_stuffBlueprint.sku).length == 0
-                || bytes(_stuffBlueprint.metadataURI).length == 0 || address(_stuffBlueprint.paymentToken) == address(0)
-                || _stuffBlueprint.paymentRecipient == address(0) || _stuffBlueprint.maxSupply <= 0
-                || _stuffBlueprint.mintPriceToken <= 0
+            bytes(_stuffCollection.category).length == 0 || bytes(_stuffCollection.sku).length == 0
+                || bytes(_stuffCollection.metadataURI).length == 0
+                || address(_stuffCollection.paymentToken) == address(0)
+                || _stuffCollection.paymentRecipient == address(0) || _stuffCollection.maxSupply <= 0
+                || _stuffCollection.mintPriceToken <= 0
         ) {
             revert InvalidConfig();
         }
 
-        if (_stuffBlueprint.palette.length == 0 || _stuffBlueprint.palette.length > uint256(type(uint8).max) + 1) {
-            revert InvalidPaletteLength(_stuffBlueprint.palette.length);
+        if (_stuffCollection.palette.length == 0 || _stuffCollection.palette.length > uint256(type(uint8).max) + 1) {
+            revert InvalidPaletteLength(_stuffCollection.palette.length);
         }
 
         if (_owner == address(0)) revert InvalidOwner();
@@ -186,16 +188,16 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
         owner = _owner;
         relayer = _relayer;
 
-        SKU = _stuffBlueprint.sku;
-        CATEGORY = _stuffBlueprint.category;
-        METADATA_URI = _stuffBlueprint.metadataURI;
-        PALETTE = _stuffBlueprint.palette;
-        OPTIONS = _stuffBlueprint.options;
+        SKU = _stuffCollection.sku;
+        CATEGORY = _stuffCollection.category;
+        METADATA_URI = _stuffCollection.metadataURI;
+        PALETTE = _stuffCollection.palette;
+        OPTIONS = _stuffCollection.options;
 
-        PAYMENT_TOKEN = _stuffBlueprint.paymentToken;
-        PAYMENT_RECIPIENT = _stuffBlueprint.paymentRecipient;
-        MAX_SUPPLY = _stuffBlueprint.maxSupply;
-        MINT_PRICE_TOKEN = _stuffBlueprint.mintPriceToken;
+        PAYMENT_TOKEN = _stuffCollection.paymentToken;
+        PAYMENT_RECIPIENT = _stuffCollection.paymentRecipient;
+        MAX_SUPPLY = _stuffCollection.maxSupply;
+        MINT_PRICE_TOKEN = _stuffCollection.mintPriceToken;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,10 +206,10 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     /**
      * @dev mint.
      */
-    function mint(address _to, StuffMintParams calldata _params) external returns (uint256 tokenId) {
+    function mint(address _to, StuffItemMintParams calldata _params) external returns (uint256 tokenId) {
         PAYMENT_TOKEN.safeTransferFrom(msg.sender, PAYMENT_RECIPIENT, MINT_PRICE_TOKEN);
 
-        tokenId = _mintStuff(_to, msg.sender, _params);
+        tokenId = _mintStuffItem(_to, msg.sender, _params);
     }
 
     /**
@@ -215,9 +217,9 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
      */
     function mintWithAuthorization(
         address _to,
-        StuffMintParams calldata _params,
+        StuffItemMintParams calldata _params,
         MintAuthorization calldata _authorization
-    ) external onlyRelayer returns (uint256 tokenId) {
+    ) external onlyRelayer returns (uint256 stuffItemId) {
         IERC3009(address(PAYMENT_TOKEN))
             .receiveWithAuthorization(
                 _authorization.from,
@@ -233,14 +235,14 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
 
         PAYMENT_TOKEN.safeTransfer(PAYMENT_RECIPIENT, MINT_PRICE_TOKEN);
 
-        tokenId = _mintStuff(_to, _authorization.from, _params);
+        stuffItemId = _mintStuffItem(_to, _authorization.from, _params);
     }
 
     /**
-     * @dev getCollection.
+     * @dev getStuffCollection.
      */
-    function getStuffBlueprint() public view returns (StuffBlueprint memory stuffBlueprint) {
-        stuffBlueprint = StuffBlueprint({
+    function getStuffCollection() public view returns (StuffCollection memory stuffCollection) {
+        stuffCollection = StuffCollection({
             sku: SKU,
             metadataURI: METADATA_URI,
             palette: PALETTE,
@@ -256,10 +258,10 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     /**
      * @dev getStuff.
      */
-    function getStuff(uint256 _tokenId) external view returns (Stuff memory stuff) {
-        _requireOwned(_tokenId);
+    function getStuffItem(uint256 _stuffItemId) external view returns (StuffItem memory stuff) {
+        _requireOwned(_stuffItemId);
 
-        stuff = _stuffs[_tokenId];
+        stuff = _stuffItems[_stuffItemId];
     }
 
     /**
@@ -340,7 +342,7 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
     /**
      * @dev _mintStuff.
      */
-    function _mintStuff(address _to, address _authorAddress, StuffMintParams calldata _params)
+    function _mintStuffItem(address _to, address _authorAddress, StuffItemMintParams calldata _params)
         internal
         returns (uint256 tokenId)
     {
@@ -348,21 +350,22 @@ contract StuffERC721 is ERC721, ERC721Enumerable {
 
         tokenId = tokenIdsIndex++;
 
-        Stuff storage stuff = _stuffs[tokenId];
+        StuffItem storage stuffItem = _stuffItems[tokenId];
 
-        stuff.author = _params.author;
-        stuff.authorAddress = _authorAddress;
+        stuffItem.id = uint256(keccak256(abi.encode(address(this), tokenId)));
+        stuffItem.author = _params.author;
+        stuffItem.authorAddress = _authorAddress;
 
-        stuff.title = _params.title;
-        stuff.description = _params.description;
-        stuff.creationDate = block.timestamp;
+        stuffItem.title = _params.title;
+        stuffItem.description = _params.description;
+        stuffItem.creationDate = block.timestamp;
 
-        stuff.canvas = _validateCanvas(_params.canvas);
-        stuff.options = _validateOptions(_params.options);
+        stuffItem.canvas = _validateCanvas(_params.canvas);
+        stuffItem.options = _validateOptions(_params.options);
+
+        emit StuffItemCreated(_to, tokenId, stuffItem);
 
         _safeMint(_to, tokenId);
-
-        emit StuffCreated(tokenId, stuff.authorAddress, keccak256(stuff.canvas));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

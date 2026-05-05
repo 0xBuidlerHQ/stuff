@@ -1,16 +1,9 @@
 import { stuffErc721Config } from "@0xhq/stuff.contracts";
-import type { StuffERC721 } from "@0xhq/stuff.contracts/types.user";
 import { cache } from "react";
 import type { Address } from "viem";
 import { readContract } from "wagmi/actions";
+import type { Stuff, StuffMinted, WallPiece } from "@/features/stuff/types";
 import { wagmiConfig } from "@/providers/wagmi.config";
-
-type WallPiece = {
-	tokenId: bigint;
-	owner: Address;
-	stuff: StuffERC721.Stuff;
-	pixels: string[];
-};
 
 const CANVAS_SIZE = 42;
 
@@ -27,12 +20,12 @@ const decodeCanvasToPixels = (canvas: string, palette: readonly string[]) => {
 };
 
 const getWallPieces = cache(
-	async (stuffAddress: Address, collection: StuffERC721.StuffCollection): Promise<WallPiece[]> => {
+	async (collection: Stuff): Promise<WallPiece[]> => {
 		try {
 			const tokenIdsIndex = (await readContract(wagmiConfig(), {
 				abi: stuffErc721Config.abi,
 				functionName: "tokenIdsIndex",
-				address: stuffAddress,
+				address: collection.address,
 			})) as bigint;
 
 			const tokenIds = Array.from({ length: Number(tokenIdsIndex) }, (_, index) => BigInt(index));
@@ -42,7 +35,7 @@ const getWallPieces = cache(
 						abi: stuffErc721Config.abi,
 						functionName: "tokenByIndex",
 						args: [index],
-						address: stuffAddress,
+						address: collection.address,
 					})) as bigint;
 
 					const [owner, stuff] = (await Promise.all([
@@ -50,15 +43,15 @@ const getWallPieces = cache(
 							abi: stuffErc721Config.abi,
 							functionName: "ownerOf",
 							args: [tokenId],
-							address: stuffAddress,
+							address: collection.address,
 						}),
 						readContract(wagmiConfig(), {
 							abi: stuffErc721Config.abi,
-							functionName: "getStuff",
+							functionName: "getStuffItem",
 							args: [tokenId],
-							address: stuffAddress,
+							address: collection.address,
 						}),
-					])) as [Address, StuffERC721.Stuff];
+					])) as [Address, StuffMinted];
 
 					return {
 						owner,
@@ -76,5 +69,4 @@ const getWallPieces = cache(
 	},
 );
 
-export type { WallPiece };
 export { CANVAS_SIZE, decodeCanvasToPixels, getWallPieces };

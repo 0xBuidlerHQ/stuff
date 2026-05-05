@@ -29,7 +29,7 @@ const FooterCategory = (props: FooterCategoryProps) => {
 
 const Footer = () => {
 	return (
-		<FooterPrimitive className="font-unbounded">
+		<FooterPrimitive>
 			<div className="bg-muted h-px" />
 
 			<Box className="py-20">

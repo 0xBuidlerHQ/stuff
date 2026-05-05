@@ -1,72 +1,80 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
+import { stuffCollectionErc721Abi } from "@0xhq/stuff.contracts";
+import { eq } from "ponder";
+import type { Address } from "viem";
 
 /**
- * @dev StuffFactory:StuffERC721Created.
+ * @dev StuffCollectionFactory:StuffCollectionERC721Created.
  */
-ponder.on("StuffFactory:StuffERC721Created", async ({ event, context }) => {
-	await context.db.insert(schema.stuffs).values({
-		id: event.args.stuffERC721,
-		stuffId: event.args.stuffId,
-		createdAtBlock: event.block.number,
-		createdAtTransaction: event.transaction.hash,
+ponder.on("StuffCollectionFactory:StuffCollectionERC721Created", async ({ event, context }) => {
+	const palette = [...event.args.stuffCollection.palette];
+	const options = event.args.stuffCollection.options.map((item) => [...item]);
+
+	await context.db.insert(schema.stuffCollection).values({
+		id: event.args.stuffId,
+		address: event.args.stuffERC721,
+		sku: event.args.stuffCollection.sku,
+		category: event.args.stuffCollection.category,
+		metadataURI: event.args.stuffCollection.metadataURI,
+		palette,
+		options,
+		paymentToken: event.args.stuffCollection.paymentToken,
+		paymentRecipient: event.args.stuffCollection.paymentRecipient,
+		maxSupply: event.args.stuffCollection.maxSupply,
+		currentSupply: 0n,
+		mintPriceToken: event.args.stuffCollection.mintPriceToken,
 	});
 });
 
 /**
- * @dev StuffERC721:StuffCreated from every collection created by StuffFactory.
+ * @dev StuffCollectionERC721:StuffItemCreated from every collection created by StuffCollectionFactory.
  */
-ponder.on("StuffERC721:StuffCreated", async ({ event, context }) => {
-	const collection = await context.db.find(schema.stuffs, { id: event.log.address });
-	if (collection === null) return;
+ponder.on("StuffCollectionERC721:StuffItemCreated", async ({ event, context }) => {
+	const { stuffItem } = event.args;
 
-	const id = `${event.log.address}-${event.args.tokenId}`;
+	const options = stuffItem.options.map((option) => [...option]);
 
-	await context.db
-		.insert(schema.stuff)
-		.values({
-			id: id,
-			stuffId: collection.stuffId,
-			stuffERC721: event.log.address,
-			tokenId: event.args.tokenId,
-			authorAddress: event.args.authorAddress,
-			canvasHash: event.args.canvasHash,
-			createdAtBlock: event.block.number,
-			createdAtTransaction: event.transaction.hash,
-			updatedAtBlock: event.block.number,
-			updatedAtTransaction: event.transaction.hash,
-		})
-		.onConflictDoUpdate({
-			authorAddress: event.args.authorAddress,
-			canvasHash: event.args.canvasHash,
-			createdAtBlock: event.block.number,
-			createdAtTransaction: event.transaction.hash,
-		});
+	await context.db.insert(schema.stuffItem).values({
+		id: stuffItem.id,
+		author: stuffItem.author,
+		authorAddress: stuffItem.authorAddress,
+		title: stuffItem.title,
+		description: stuffItem.description,
+		creationDate: stuffItem.creationDate,
+		canvas: stuffItem.canvas,
+		options: options,
+		//
+		stuffAddress: event.log.address,
+		tokenId: event.args.tokenId,
+		owner: event.args.to.toLowerCase() as Address,
+	});
+
+	const [stuffCollection] = await context.db.sql
+		.select()
+		.from(schema.stuffCollection)
+		.where(eq(schema.stuffCollection.address, event.log.address))
+		.limit(1);
+
+	if (!stuffCollection) return;
+
+	await context.db.update(schema.stuffCollection, { id: stuffCollection.id }).set({
+		currentSupply: event.args.tokenId + 1n,
+	});
 });
 
 /**
- * @dev StuffERC721:Transfer keeps current owner fresh on each stuff row.
+ * @dev StuffCollectionERC721:Transfer keeps mutable ERC721 ownership state fresh on the indexed item row.
  */
-ponder.on("StuffERC721:Transfer", async ({ event, context }) => {
-	const collection = await context.db.find(schema.stuffs, { id: event.log.address });
-	if (collection === null) return;
+ponder.on("StuffCollectionERC721:Transfer", async ({ event, context }) => {
+	const stuffItem = await context.client.readContract({
+		abi: stuffCollectionErc721Abi,
+		address: event.log.address,
+		functionName: "getStuffItem",
+		args: [event.args.tokenId],
+	});
 
-	const id = `${event.log.address}-${event.args.tokenId}`;
-
-	await context.db
-		.insert(schema.stuff)
-		.values({
-			id,
-			stuffId: collection.stuffId,
-			stuffERC721: event.log.address,
-			tokenId: event.args.tokenId,
-			owner: event.args.to,
-			updatedAtBlock: event.block.number,
-			updatedAtTransaction: event.transaction.hash,
-		})
-		.onConflictDoUpdate({
-			owner: event.args.to,
-			updatedAtBlock: event.block.number,
-			updatedAtTransaction: event.transaction.hash,
-		});
+	await context.db.update(schema.stuffItem, { id: stuffItem.id }).set({
+		owner: event.args.to.toLowerCase() as Address,
+	});
 });

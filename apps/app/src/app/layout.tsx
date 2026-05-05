@@ -6,7 +6,6 @@ import { cookieToInitialState } from "wagmi";
 import { geistSans, interSans, tronicaMono, unbounded } from "@/config/fonts";
 import { Footer } from "@/layouts/footer";
 import { Header } from "@/layouts/header";
-import { RouteLabel } from "@/layouts/route-label";
 import { Box } from "@/primitives/box";
 import { Providers } from "@/providers";
 import { wagmiConfig } from "@/providers/wagmi.config";
@@ -41,11 +40,7 @@ export default async function RootLayout({
 
 					<main className="flex grow min-h-0">
 						<Box className="grow relative">
-							<Box className="py-10">
-								<RouteLabel />
-
-								{children}
-							</Box>
+							<Box className="py-2">{children}</Box>
 						</Box>
 					</main>
 

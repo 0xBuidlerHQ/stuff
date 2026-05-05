@@ -1,14 +1,10 @@
 "use client";
 
-import type { Stuff } from "@/features/stuff/type";
+import type { Stuff, StuffConfiguration } from "@/features/stuff/types";
 import { Box } from "@/primitives/box";
 import { ButtonPrimary } from "@/primitives/button";
 import { Grid } from "./grid";
-import {
-	type StuffConfiguration,
-	StuffConfiguratorProvider,
-	useStuffConfigurator,
-} from "./provider";
+import { StuffConfiguratorProvider, useStuffConfigurator } from "./provider";
 
 type StuffConfiguratorProps = {
 	stuff: Stuff;
@@ -17,7 +13,7 @@ type StuffConfiguratorProps = {
 const StuffConfiguratorContent = () => {
 	const { configuration, isConfigurationComplete, updateConfiguration, addToCart } =
 		useStuffConfigurator();
-	const { options, palette } = configuration.blueprint;
+	const { options, palette } = configuration.stuff.blueprint;
 
 	return (
 		<Box className="grid gap-6">

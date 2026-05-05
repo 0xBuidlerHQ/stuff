@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "NODE_OPTIONS=--max-old-space-size=8192 next dev --webpack",
+		"dev": "NODE_OPTIONS=--max-old-space-size=8192 next dev",
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint"
@@ -12,9 +12,12 @@
 		"@0xhq/beaut": "^0.0.1",
 		"@0xhq/relay": "^0.0.0",
 		"@0xhq/stuff.contracts": "workspace:*",
+		"@0xhq/stuff.subgraph": "workspace:*",
 		"@account-kit/react": "^4.87.2",
 		"@base-ui/react": "^1.4.0",
 		"@icons-pack/react-simple-icons": "^13.13.0",
+		"@ponder/client": "^0.16.6",
+		"@ponder/react": "^0.16.6",
 		"@react-three/drei": "^10.7.7",
 		"@react-three/fiber": "^9.6.0",
 		"@stripe/react-stripe-js": "^6.3.0",

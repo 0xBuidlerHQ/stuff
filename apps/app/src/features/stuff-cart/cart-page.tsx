@@ -1,18 +1,18 @@
 "use client";
 
 import { Beaut } from "@0xhq/beaut";
-import Image from "next/image";
 import { Trash2 } from "lucide-react";
+import Image from "next/image";
+import { GridPreview } from "@/features/stuff-configurator/grid";
 import { Box } from "@/primitives/box";
 import { Button, ButtonPrimary } from "@/primitives/button";
-import { GridPreview } from "@/features/stuff-configurator/grid";
+import { type StuffCartItem, useStuffCartStore } from "./store";
 import { useStuffPurchase } from "./use-stuff-purchase";
-import { useStuffCartStore, type StuffCartItem } from "./store";
 
 const CartPurchaseButton = ({ item }: { item: StuffCartItem }) => {
 	const removeItem = useStuffCartStore((state) => state.removeItem);
-	const { errorMessage, isPending, label, pay } = useStuffPurchase(item.configuration, {
-		onSuccess: () => removeItem(item.id),
+	const { errorMessage, isPending, label, pay } = useStuffPurchase(item, {
+		onSuccess: () => removeItem(item),
 	});
 
 	return (
@@ -31,17 +31,25 @@ const CartItemCard = ({ item }: { item: StuffCartItem }) => {
 	return (
 		<Box className="grid gap-6 border border-border bg-background p-4 desktop:grid-cols-[120px_minmax(0,1fr)_240px]">
 			<Box className="relative aspect-square overflow-hidden border border-border bg-muted">
-				<Image fill className="object-cover" src={item.stuff.assets.images[0]} alt={item.stuff.slug} />
+				<Image
+					fill
+					className="object-cover"
+					src={item.stuff.assets.images[0]}
+					alt={item.stuff.slug}
+				/>
 			</Box>
 
 			<Box className="grid gap-4">
 				<Box className="flex items-start justify-between gap-4">
 					<Box className="grid gap-1">
-						<Box className="text-2xl">{item.stuff.blueprint.sku}</Box>
-						<Box className="text-xs text-muted-foreground">{item.configuration.title || "-"}</Box>
+						<Box className="text-2xl">{item.stuff.sku}</Box>
+						<Box className="text-xs text-muted-foreground">{item.title || "-"}</Box>
 					</Box>
 
-					<Button onClick={() => removeItem(item.id)} className="text-muted-foreground hover:text-foreground">
+					<Button
+						onClick={() => removeItem(item)}
+						className="text-muted-foreground hover:text-foreground"
+					>
 						<Trash2 className="size-4" strokeWidth={1.75} />
 					</Button>
 				</Box>
@@ -49,16 +57,16 @@ const CartItemCard = ({ item }: { item: StuffCartItem }) => {
 				<Box className="grid gap-3 text-sm">
 					<Box>
 						<Box className="text-[11px] uppercase text-muted-foreground">Author</Box>
-						<Box>{item.configuration.author || "-"}</Box>
+						<Box>{item.author || "-"}</Box>
 					</Box>
 					<Box>
 						<Box className="text-[11px] uppercase text-muted-foreground">Description</Box>
-						<Box className="text-muted-foreground">{item.configuration.description || "-"}</Box>
+						<Box className="text-muted-foreground">{item.description || "-"}</Box>
 					</Box>
 					<Box>
 						<Box className="text-[11px] uppercase text-muted-foreground">Options</Box>
 						<Box className="grid gap-1">
-							{Object.entries(item.configuration.selectedOptions).map(([name, value]) => (
+							{Object.entries(item.selectedOptions).map(([name, value]) => (
 								<Box key={name} className="flex gap-2">
 									<Box className="capitalize text-muted-foreground">{name}</Box>
 									<Box>{value}</Box>
@@ -71,14 +79,14 @@ const CartItemCard = ({ item }: { item: StuffCartItem }) => {
 
 			<Box className="grid gap-4">
 				<GridPreview
-					size={item.configuration.design.size}
-					pixels={item.configuration.design.pixels}
+					size={item.design.size}
+					pixels={item.design.pixels}
 					className="border-border"
 				/>
 				<Box className="flex items-center justify-between">
 					<Box className="text-xs text-muted-foreground">Price</Box>
 					<Box className="text-xl">
-						{Beaut.money(Number(Beaut.bigint(item.stuff.blueprint.mintPriceToken, 6)))}
+						{Beaut.money(Number(Beaut.bigint(item.stuff.mintPriceToken, 6)))}
 					</Box>
 				</Box>
 				<CartPurchaseButton item={item} />
@@ -90,7 +98,7 @@ const CartItemCard = ({ item }: { item: StuffCartItem }) => {
 const StuffCartPage = () => {
 	const items = useStuffCartStore((state) => state.items);
 	const clearItems = useStuffCartStore((state) => state.clearItems);
-	const total = items.reduce((sum, item) => sum + item.stuff.blueprint.mintPriceToken, BigInt(0));
+	const total = items.reduce((sum, item) => sum + item.stuff.mintPriceToken, BigInt(0));
 
 	if (items.length === 0) {
 		return (
@@ -114,7 +122,10 @@ const StuffCartPage = () => {
 				<Box className="grid justify-items-end gap-1">
 					<Box className="text-xs text-muted-foreground">Total</Box>
 					<Box className="text-2xl">{Beaut.money(Number(Beaut.bigint(total, 6)))}</Box>
-					<Button onClick={clearItems} className="text-xs text-muted-foreground hover:text-foreground">
+					<Button
+						onClick={clearItems}
+						className="text-xs text-muted-foreground hover:text-foreground"
+					>
 						Clear cart
 					</Button>
 				</Box>
@@ -122,7 +133,7 @@ const StuffCartPage = () => {
 
 			<Box className="grid gap-4">
 				{items.map((item) => (
-					<CartItemCard key={item.id} item={item} />
+					<CartItemCard key={`${item.stuff.address}-${item.title}-${item.author}`} item={item} />
 				))}
 			</Box>
 		</Box>

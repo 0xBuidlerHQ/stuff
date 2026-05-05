@@ -1,19 +1,12 @@
 "use client";
 
 import { create } from "zustand";
-import type { StuffConfiguration } from "@/features/stuff-configurator/provider";
-import type { Stuff } from "@/features/stuff/type";
-
-type StuffCartItem = {
-	id: string;
-	stuff: Stuff;
-	configuration: StuffConfiguration;
-};
+import type { StuffCartItem } from "@/features/stuff/types";
 
 type StuffCartStoreState = {
 	items: StuffCartItem[];
 	addItem: (item: StuffCartItem) => void;
-	removeItem: (id: string) => void;
+	removeItem: (item: StuffCartItem) => void;
 	clearItems: () => void;
 };
 
@@ -23,9 +16,9 @@ const useStuffCartStore = create<StuffCartStoreState>()((set) => ({
 		set((state) => ({
 			items: [...state.items, item],
 		})),
-	removeItem: (id) =>
+	removeItem: (itemToRemove) =>
 		set((state) => ({
-			items: state.items.filter((item) => item.id !== id),
+			items: state.items.filter((item) => item !== itemToRemove),
 		})),
 	clearItems: () => set({ items: [] }),
 }));

@@ -1,7 +1,7 @@
 import { env } from "@/config/env";
+import { getStuffs } from "@/features/stuff/getStuffs";
 import { getWallPieces } from "@/features/stuff-wall/get-wall-pieces";
 import { StuffWallSection } from "@/features/stuff-wall/wall";
-import { getStuffs } from "@/features/stuff/getStuffs";
 import { Box } from "@/primitives/box";
 import { Container } from "@/primitives/container";
 
@@ -10,7 +10,7 @@ const Page = async () => {
 	const stuffSections = await Promise.all(
 		stuffs.map(async (stuff) => ({
 			stuff,
-			pieces: await getWallPieces(stuff.address, stuff.blueprint),
+			pieces: await getWallPieces(stuff),
 		})),
 	);
 

@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 import {StdCheats} from "forge-std/StdCheats.sol";
 
-import {StuffERC721} from "@stuff/StuffERC721.sol";
-import {StuffFactory} from "@stuff/StuffFactory.sol";
+import {StuffCollectionERC721} from "@stuff/StuffCollectionERC721.sol";
+import {StuffCollectionFactory} from "@stuff/StuffCollectionFactory.sol";
 
 import {Actors} from "./utils/Actors.s.sol";
 import {Packages} from "./utils/Packages.s.sol";
@@ -59,9 +59,9 @@ contract Deploy is Actors, Packages, StdCheats {
         /**
          * @dev Pures.
          */
-        StuffFactory stuffFactory = new StuffFactory{salt: SALT}();
-        StuffERC721 stuffERC721 = stuffFactory.createStuffERC721(
-            StuffERC721.StuffBlueprint({
+        StuffCollectionFactory stuffCollectionFactory = new StuffCollectionFactory{salt: SALT}();
+        StuffCollectionERC721 stuffCollectionERC721 = stuffCollectionFactory.createStuffCollectionERC721(
+            StuffCollectionERC721.StuffCollection({
                 sku: "stuff-00000",
                 category: "garment",
                 metadataURI: "https://example.com/stuff-00000.json",
@@ -84,8 +84,8 @@ contract Deploy is Actors, Packages, StdCheats {
          */
         addDeployment("USDC", address(usdc));
 
-        addDeployment("StuffFactory", address(stuffFactory));
-        addDeployment("StuffERC721", address(stuffERC721));
+        addDeployment("StuffFactory", address(stuffCollectionFactory));
+        addDeployment("StuffERC721", address(stuffCollectionERC721));
     }
 
     function _fundLocalActors(Actor memory deployer, IERC20 usdc, address alice, address bob) internal {

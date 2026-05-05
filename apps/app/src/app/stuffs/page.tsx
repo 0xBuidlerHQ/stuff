@@ -1,18 +1,15 @@
-import { env } from "@/config/env";
-import { getStuffs } from "@/features/stuff/getStuffs";
-import { Stuff } from "@/features/stuff/stuff";
+import { StuffCollectionGallery } from "@/features/stuff/stuffCollectionGallery";
 import { Box } from "@/primitives/box";
 import { Container } from "@/primitives/container";
+import { getStuffCollections } from "@/queries/getStuffCollections";
 
 const StuffsPage = async () => {
-	const stuffs = await getStuffs({ chainId: env.CHAIN_ID as any });
+	const stuffCollections = await getStuffCollections();
 
 	return (
 		<Container>
 			<Box className="grid grid-cols-4 mobile:grid-cols-1 gap-4">
-				{stuffs.map((stuff) => (
-					<Stuff key={stuff.id} stuff={stuff} />
-				))}
+				<StuffCollectionGallery stuffCollections={stuffCollections} />
 			</Box>
 		</Container>
 	);

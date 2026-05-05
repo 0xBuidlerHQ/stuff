@@ -2,7 +2,7 @@
 
 import type { Address, Hex } from "viem";
 import { toHex } from "viem";
-import type { StuffConfiguration } from "@/features/stuff-configurator/provider";
+import type { StuffConfiguration } from "@/features/stuff/types";
 
 const erc3009MetadataAbi = [
 	{
@@ -73,7 +73,7 @@ type MintRelayRequest = {
 
 const getMintCanvas = (configuration: StuffConfiguration) => {
 	const paletteIndexByColor = new Map(
-		configuration.blueprint.palette.map((color, index) => [color, index] as const),
+		configuration.stuff.palette.map((color, index) => [color, index] as const),
 	);
 	const paletteIndexes = configuration.design.pixels.map((color) => {
 		const paletteIndex = paletteIndexByColor.get(color);
@@ -89,7 +89,7 @@ const getMintCanvas = (configuration: StuffConfiguration) => {
 };
 
 const getMintOptions = (configuration: StuffConfiguration) => {
-	return configuration.blueprint.options.map(([name]) => {
+	return configuration.stuff.options.map(([name]) => {
 		const value = configuration.selectedOptions[name];
 
 		if (!value) {
@@ -148,7 +148,7 @@ const getMintRelayRequest = ({
 	owner: Address;
 }): MintRelayRequest => ({
 	chainId,
-	stuffAddress: configuration.stuffAddress,
+	stuffAddress: configuration.stuff.address,
 	recipient: owner,
 	mintParams: getMintParams(configuration),
 	authorization: {
