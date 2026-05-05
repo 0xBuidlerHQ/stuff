@@ -3,7 +3,7 @@
 import { Beaut } from "@0xhq/beaut";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
-import { GridPreview } from "@/features/stuff-configurator/grid";
+import { GridPreview } from "@/features/grid";
 import { Box } from "@/primitives/box";
 import { Button, ButtonPrimary } from "@/primitives/button";
 import { type StuffCartItem, useStuffCartStore } from "./store";
@@ -34,15 +34,15 @@ const CartItemCard = ({ item }: { item: StuffCartItem }) => {
 				<Image
 					fill
 					className="object-cover"
-					src={item.stuff.assets.images[0]}
-					alt={item.stuff.slug}
+					src={item.stuffCollection.assets.images[0]}
+					alt={item.stuffCollection.slug}
 				/>
 			</Box>
 
 			<Box className="grid gap-4">
 				<Box className="flex items-start justify-between gap-4">
 					<Box className="grid gap-1">
-						<Box className="text-2xl">{item.stuff.sku}</Box>
+						<Box className="text-2xl">{item.stuffCollection.sku}</Box>
 						<Box className="text-xs text-muted-foreground">{item.title || "-"}</Box>
 					</Box>
 
@@ -86,7 +86,7 @@ const CartItemCard = ({ item }: { item: StuffCartItem }) => {
 				<Box className="flex items-center justify-between">
 					<Box className="text-xs text-muted-foreground">Price</Box>
 					<Box className="text-xl">
-						{Beaut.money(Number(Beaut.bigint(item.stuff.mintPriceToken, 6)))}
+						{Beaut.money(Number(Beaut.bigint(item.stuffCollection.mintPriceToken, 6)))}
 					</Box>
 				</Box>
 				<CartPurchaseButton item={item} />
@@ -98,7 +98,7 @@ const CartItemCard = ({ item }: { item: StuffCartItem }) => {
 const StuffCartPage = () => {
 	const items = useStuffCartStore((state) => state.items);
 	const clearItems = useStuffCartStore((state) => state.clearItems);
-	const total = items.reduce((sum, item) => sum + item.stuff.mintPriceToken, BigInt(0));
+	const total = items.reduce((sum, item) => sum + item.stuffCollection.mintPriceToken, BigInt(0));
 
 	if (items.length === 0) {
 		return (
@@ -133,7 +133,10 @@ const StuffCartPage = () => {
 
 			<Box className="grid gap-4">
 				{items.map((item) => (
-					<CartItemCard key={`${item.stuff.address}-${item.title}-${item.author}`} item={item} />
+					<CartItemCard
+						key={`${item.stuffCollection.address}-${item.title}-${item.author}`}
+						item={item}
+					/>
 				))}
 			</Box>
 		</Box>

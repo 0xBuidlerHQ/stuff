@@ -8,6 +8,10 @@ import { cn } from "@/utils";
 
 const NavigationItems = [links.stuffs, links.wall, links.culture, links.impact, links.about];
 
+const isActive = (pathname: string, url: string) => {
+	return pathname === url || pathname.startsWith(`${url}/`);
+};
+
 const NavigationItem = (
 	props: (typeof NavigationItems)[number] & {
 		isActive?: boolean;
@@ -35,13 +39,16 @@ const Navigation = () => {
 	return (
 		<Box className="flex items-center justify-center gap-2">
 			{NavigationItems.map((navigationItem) => {
-				const isActive =
-					pathname === navigationItem.url || pathname.startsWith(`${navigationItem.url}/`);
-
-				return <NavigationItem key={navigationItem.name} isActive={isActive} {...navigationItem} />;
+				return (
+					<NavigationItem
+						key={navigationItem.name}
+						isActive={isActive(pathname, navigationItem.url)}
+						{...navigationItem}
+					/>
+				);
 			})}
 		</Box>
 	);
 };
 
-export { Navigation, NavigationItem };
+export { isActive, Navigation, NavigationItem };

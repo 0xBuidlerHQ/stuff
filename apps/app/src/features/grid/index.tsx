@@ -10,19 +10,19 @@ const EMPTY_COLOR = "transparent";
 
 type GridProps = {
 	size: number;
-	palettes: readonly string[];
-	pixels: readonly string[];
+	palettes: string[];
+	pixels: string[];
 	onPixelsChange: (pixels: string[]) => void;
 };
 
 type GridPreviewProps = {
 	size: number;
-	pixels: readonly string[];
+	pixels: string[];
 	className?: string;
 };
 
 type PalettePickerProps = {
-	palettes: readonly string[];
+	palettes: string[];
 	selectedColor: string;
 	onSelectColor: (color: string) => void;
 };
@@ -30,7 +30,7 @@ type PalettePickerProps = {
 type PixelCanvasProps = {
 	size: number;
 	brushSize: number;
-	pixels: readonly string[];
+	pixels: string[];
 	onBeginStroke: () => void;
 	onPaintPixel: (index: number) => void;
 };

@@ -4,53 +4,51 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import Img from "@/app/icon.svg";
-import { env } from "@/config/env";
-import { getStuffs } from "@/features/stuff/getStuffs";
-import { StuffGallery } from "@/features/stuff/stuffGallery";
-import { StuffConfigurator } from "@/features/stuff-configurator/stuff-configurator";
-
+import { StuffCollectionImageGallery } from "@/features/stuff/stuffCollectionImageGallery";
+import { StuffItemConfigurator } from "@/features/stuff/stuffItemConfigurator";
 import { Box } from "@/primitives/box";
 import { Container } from "@/primitives/container";
+import { getStuffCollections } from "@/queries/getStuffCollections";
 
 export const dynamicParams = false;
 
 export const generateStaticParams = async () => {
-	const stuffs = await getStuffs({ chainId: env.CHAIN_ID as any });
-	return stuffs.map((stuff) => ({ slug: stuff.slug }));
+	const stuffCollections = await getStuffCollections();
+	return stuffCollections.map((stuffCollection) => ({ slug: stuffCollection.slug }));
 };
 
-const StuffPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
+const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
 	const { slug } = await params;
 
-	const stuffs = await getStuffs({ chainId: env.CHAIN_ID as any });
-	const stuff = stuffs.find((stuff) => stuff.slug === slug);
+	const stuffCollections = await getStuffCollections();
+	const stuffCollection = stuffCollections.find((stuffCollection) => stuffCollection.slug === slug);
 
-	if (!stuff) notFound();
+	if (!stuffCollection) notFound();
 
 	return (
 		<Container>
 			<Box className="grid gap-6 desktop:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] desktop:items-start">
-				<Box className="min-w-0 desktop:sticky desktop:top-0 desktop:h-screen desktop:self-start">
+				<Box className="min-w-0 desktop:sticky desktop:top-0 desktop:self-start">
 					<Box className="grid h-full min-h-0 gap-6 overflow-hidden">
 						<Box className="flex flex-col gap-2">
 							<Box className="flex items-center justify-between gap-4">
 								<Box className="flex items-center gap-2">
-									<h1 className="text-5xl">{stuff.sku}</h1>
+									<h1 className="text-5xl">{stuffCollection.sku}</h1>
 								</Box>
 
 								<Box>
 									<h1 className="text-2xl pl-1 pr-2 pt-1 bg-foreground text-background inline">
-										{Beaut.money(Number(Beaut.bigint(stuff.mintPriceToken, 6)))}
+										{Beaut.money(Number(Beaut.bigint(stuffCollection.mintPriceToken, 6)))}
 									</h1>
 								</Box>
 							</Box>
 
 							<h1 className="text-xs text-muted-foreground">
-								&nbsp;&nbsp;{stuff.assets.description}
+								&nbsp;&nbsp;{stuffCollection.assets.description}
 							</h1>
 						</Box>
 
-						<StuffGallery stuff={stuff} />
+						<StuffCollectionImageGallery stuffCollection={stuffCollection} />
 					</Box>
 				</Box>
 
@@ -70,7 +68,7 @@ const StuffPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 							</h1>
 						</Box>
 
-						<StuffConfigurator stuff={stuff} />
+						<StuffItemConfigurator stuffCollection={stuffCollection} />
 					</Box>
 				</Box>
 			</Box>
@@ -78,4 +76,4 @@ const StuffPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
 	);
 };
 
-export default StuffPage;
+export default Page;

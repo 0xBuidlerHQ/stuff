@@ -4,7 +4,8 @@ import { Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { links } from "@/config/links";
-import { NavigationItem } from "@/layouts/header/navigation";
+import { useStuffCartStore } from "@/features/stuff-cart/store";
+import { isActive, NavigationItem } from "@/layouts/header/navigation";
 import { Box } from "@/primitives/box";
 import { Button } from "@/primitives/button";
 import { useWeb3 } from "@/providers/web3";
@@ -24,23 +25,32 @@ const LoadingButton = () => {
 	);
 };
 
-const NavigationItems = [links.cart, links.account];
-
 const ConnectedButton = () => {
 	const pathname = usePathname();
 
+	const cart = useStuffCartStore();
+
 	return (
 		<Box className="flex gap-2 h-8 items-center text-sm font-medium">
-			{NavigationItems.map((navigationItem) => {
-				const isActive =
-					pathname === navigationItem.url || pathname.startsWith(`${navigationItem.url}/`);
+			<Box className="relative">
+				<NavigationItem
+					key={links.cart.name}
+					isActive={isActive(pathname, links.cart.url)}
+					{...links.cart}
+				/>
 
-				return <NavigationItem key={navigationItem.name} isActive={isActive} {...navigationItem} />;
-			})}
+				{cart.items.length > 0 && (
+					<Box className="absolute -top-3 right-0.5 text-[10px] text-red-500 font-semibold">
+						{cart.items.length}
+					</Box>
+				)}
+			</Box>
 
-			{/* <Button onClick={disconnect}>
-				<LogOutIcon className="size-4" />
-			</Button> */}
+			<NavigationItem
+				key={links.account.name}
+				isActive={isActive(pathname, links.account.url)}
+				{...links.account}
+			/>
 		</Box>
 	);
 };

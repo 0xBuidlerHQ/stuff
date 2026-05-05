@@ -2,7 +2,9 @@
 
 import type { Address, Hex } from "viem";
 import { toHex } from "viem";
-import type { StuffConfiguration } from "@/features/stuff/types";
+import type { StuffItemParams } from "@/features/stuff/types";
+
+const MAX_PALETTE_COLORS = 256;
 
 const erc3009MetadataAbi = [
 	{
@@ -71,10 +73,13 @@ type MintRelayRequest = {
 	};
 };
 
-const getMintCanvas = (configuration: StuffConfiguration) => {
-	const paletteIndexByColor = new Map(
-		configuration.stuff.palette.map((color, index) => [color, index] as const),
-	);
+const getMintCanvas = (configuration: StuffItemParams) => {
+	const palette = Array.isArray(configuration.stuffCollection.palette)
+		? configuration.stuffCollection.palette
+				.slice(0, MAX_PALETTE_COLORS)
+				.filter((color): color is string => typeof color === "string")
+		: [];
+	const paletteIndexByColor = new Map(palette.map((color, index) => [color, index] as const));
 	const paletteIndexes = configuration.design.pixels.map((color) => {
 		const paletteIndex = paletteIndexByColor.get(color);
 
@@ -88,8 +93,14 @@ const getMintCanvas = (configuration: StuffConfiguration) => {
 	return toHex(Uint8Array.from(paletteIndexes));
 };
 
-const getMintOptions = (configuration: StuffConfiguration) => {
-	return configuration.stuff.options.map(([name]) => {
+const getMintOptions = (configuration: StuffItemParams) => {
+	const options = Array.isArray(configuration.stuffCollection.options)
+		? configuration.stuffCollection.options
+				.filter((option): option is string[] => Array.isArray(option))
+				.map((option) => option.filter((value): value is string => typeof value === "string"))
+		: [];
+
+	return options.map(([name]) => {
 		const value = configuration.selectedOptions[name];
 
 		if (!value) {
@@ -100,7 +111,7 @@ const getMintOptions = (configuration: StuffConfiguration) => {
 	});
 };
 
-const getMintParams = (configuration: StuffConfiguration) => ({
+const getMintParams = (configuration: StuffItemParams) => ({
 	author: configuration.author,
 	canvas: getMintCanvas(configuration),
 	description: configuration.description,
@@ -144,11 +155,11 @@ const getMintRelayRequest = ({
 }: {
 	authorization: MintAuthorization;
 	chainId: number;
-	configuration: StuffConfiguration;
+	configuration: StuffItemParams;
 	owner: Address;
 }): MintRelayRequest => ({
 	chainId,
-	stuffAddress: configuration.stuff.address,
+	stuffAddress: configuration.stuffCollection.address,
 	recipient: owner,
 	mintParams: getMintParams(configuration),
 	authorization: {

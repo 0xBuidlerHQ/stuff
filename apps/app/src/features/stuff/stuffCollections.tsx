@@ -5,11 +5,11 @@ import type { StuffCollection } from "@/config/types";
 import { Box } from "@/primitives/box";
 import { Button } from "@/primitives/button";
 
-type StuffCollectionGalleryProps = {
+type StuffCollectionsProps = {
 	stuffCollections: StuffCollection[];
 };
 
-const StuffCollectionGallery = (props: StuffCollectionGalleryProps) => {
+const StuffCollections = (props: StuffCollectionsProps) => {
 	return (
 		<Box>
 			{props.stuffCollections.map((stuffCollection) => {
@@ -29,7 +29,10 @@ const StuffCollectionGallery = (props: StuffCollectionGalleryProps) => {
 
 								<Box className="flex justify-between px-2 bg-muted border-x border-x-border">
 									<Box className="text-xs">Supply:</Box>
-									<Box className="text-xs">1/{Beaut.bigint(stuffCollection.maxSupply, 1)}</Box>
+									<Box className="text-xs">
+										{Beaut.bigint(stuffCollection.currentSupply, 0)}/
+										{Beaut.bigint(stuffCollection.maxSupply, 0)}
+									</Box>
 								</Box>
 
 								<Box className="bg-foreground text-background border border-border flex justify-between px-2">
@@ -47,4 +50,4 @@ const StuffCollectionGallery = (props: StuffCollectionGalleryProps) => {
 	);
 };
 
-export { StuffCollectionGallery };
+export { StuffCollections };

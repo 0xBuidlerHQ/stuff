@@ -1,3 +1,4 @@
+import type { StuffCollectionERC721 } from "@0xhq/stuff.contracts/types.user";
 import type { SubgraphTypes } from "@0xhq/stuff.subgraph";
 import type { StaticImageData } from "next/image";
 
@@ -17,6 +18,11 @@ type StuffItem = SubgraphTypes.StuffItem & {
 };
 
 /**
+ * @dev UI StuffItemMintParams type.
+ */
+type StuffItemMintParams = StuffCollectionERC721.StuffItemMintParams;
+
+/**
  * @dev
  */
 type StuffAssets = {
@@ -25,4 +31,4 @@ type StuffAssets = {
 	information: string[][];
 };
 
-export type { StuffCollection, StuffItem };
+export type { StuffCollection, StuffItem, StuffItemMintParams };

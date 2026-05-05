@@ -2,15 +2,15 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import type { Stuff } from "@/features/stuff/types";
+import type { StuffCollection } from "@/config/types";
 import { Box } from "@/primitives/box";
 
-type StuffGalleryProps = {
-	stuff: Stuff;
+type StuffCollectionImageGalleryProps = {
+	stuffCollection: StuffCollection;
 };
 
-const StuffGallery = ({ stuff }: StuffGalleryProps) => {
-	const images = stuff.assets.images;
+const StuffCollectionImageGallery = (props: StuffCollectionImageGalleryProps) => {
+	const images = props.stuffCollection.assets.images;
 
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -26,7 +26,7 @@ const StuffGallery = ({ stuff }: StuffGalleryProps) => {
 
 					return (
 						<button
-							key={`${stuff.id}-thumb-${index}`}
+							key={`${props.stuffCollection.id}-thumb-${index}`}
 							type="button"
 							className={[
 								"relative shrink-0 overflow-hidden border bg-background transition",
@@ -59,4 +59,4 @@ const StuffGallery = ({ stuff }: StuffGalleryProps) => {
 	);
 };
 
-export { StuffGallery };
+export { StuffCollectionImageGallery };

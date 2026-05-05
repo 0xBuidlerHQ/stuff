@@ -1,39 +1,28 @@
 import type { StuffCollectionERC721 } from "@0xhq/stuff.contracts/types.user";
 import type { Address, Hex } from "viem";
-import type { Stuff } from "@/config/types";
+import type { StuffCollection, StuffItemMintParams } from "@/config/types";
 
-type StuffAddress = Stuff["address"];
-type StuffCollection = Omit<Stuff, "assets" | "id" | "address" | "slug">;
+type Stuff = StuffCollection;
+type StuffAddress = StuffCollection["address"];
 type StuffMinted = StuffCollectionERC721.StuffItem;
-type StuffSlug = Stuff["slug"];
+type StuffSlug = StuffCollection["slug"];
 type StuffTokenId = bigint;
-
 type StuffItem = StuffCollectionERC721.StuffItem;
-
 type StuffItems = StuffItem[];
+type StuffCartItem = StuffItemParams;
 
 type StuffDesign = {
 	size: number;
 	pixels: string[];
 };
 
-type StuffConfiguration = {
-	stuff: Stuff;
-	author: StuffMinted["author"];
-	title: StuffMinted["title"];
-	description: StuffMinted["description"];
+type StuffItemParams = {
+	stuffCollection: StuffCollection;
+	author: StuffItemMintParams["author"];
+	title: StuffItemMintParams["title"];
+	description: StuffItemMintParams["description"];
 	design: StuffDesign;
 	selectedOptions: Record<string, string>;
-};
-
-type StuffCartItem = StuffConfiguration;
-
-type StuffMintParams = {
-	author: StuffConfiguration["author"];
-	title: StuffConfiguration["title"];
-	description: StuffConfiguration["description"];
-	canvas: Hex;
-	options: string[][];
 };
 
 type MintAuthorization = {
@@ -50,7 +39,7 @@ type MintRelayRequest = {
 	chainId: number;
 	stuffAddress: StuffAddress;
 	recipient: Address;
-	mintParams: StuffMintParams;
+	mintParams: StuffItemMintParams;
 	authorization: {
 		from: MintAuthorization["from"];
 		validAfter: string;
@@ -70,7 +59,7 @@ type WallPiece = {
 };
 
 type OwnedStuffPiece = WallPiece & {
-	collection: Stuff;
+	collection: StuffCollection;
 };
 
 export type {
@@ -81,12 +70,12 @@ export type {
 	StuffAddress,
 	StuffCartItem,
 	StuffCollection,
-	StuffConfiguration,
 	StuffDesign,
 	StuffItem,
+	StuffItemMintParams,
+	StuffItemParams,
 	StuffItems,
 	StuffMinted,
-	StuffMintParams,
 	StuffSlug,
 	StuffTokenId,
 	WallPiece,

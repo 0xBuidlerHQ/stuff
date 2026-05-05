@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { links } from "@/config/links";
+import { GridPreview } from "@/features/grid";
 import type { Stuff, WallPiece } from "@/features/stuff/types";
-import { GridPreview } from "@/features/stuff-configurator/grid";
 import { Box } from "@/primitives/box";
 import { Container } from "@/primitives/container";
 
