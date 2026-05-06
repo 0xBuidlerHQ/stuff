@@ -8,21 +8,32 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import type { StuffCollection } from "@/config/types";
-import { useStuffCartStore } from "@/features/stuff-cart/store";
+import type { StuffCollection, StuffItemCart } from "@/config/types";
+import { useCartStore } from "@/features/cart/store";
 import { Box } from "@/primitives/box";
 import { ButtonPrimary } from "@/primitives/button";
 import { Grid, getDefaultPixels } from "../grid";
-import type { StuffItemParams } from "./types";
+
+type StuffItemConfiguration = {
+	stuffCollection: StuffCollection;
+	author: StuffItemCart["author"];
+	title: StuffItemCart["title"];
+	description: StuffItemCart["description"];
+	design: {
+		size: number;
+		pixels: string[];
+	};
+	selectedOptions: Record<string, string>;
+};
 
 type StuffItemConfiguratorProps = {
 	stuffCollection: StuffCollection;
 };
 
 type StuffItemConfiguratorContextValue = {
-	configuration: StuffItemParams;
+	configuration: StuffItemConfiguration;
 	isConfigurationComplete: boolean;
-	updateConfiguration: (patch: Partial<StuffItemParams>) => void;
+	updateConfiguration: (patch: Partial<StuffItemConfiguration>) => void;
 	addToCart: () => void;
 };
 
@@ -51,7 +62,46 @@ const getOptions = (stuffCollection: StuffCollection) => {
 		.map((option) => option.filter((value): value is string => typeof value === "string"));
 };
 
-const createDefaultConfiguration = (stuffCollection: StuffCollection): StuffItemParams => {
+const getCanvas = (configuration: StuffItemConfiguration): StuffItemCart["canvas"] => {
+	const palette = getPalette(configuration.stuffCollection);
+	const paletteIndexByColor = new Map(palette.map((color, index) => [color, index] as const));
+	const paletteIndexes = configuration.design.pixels.map((color) => {
+		const paletteIndex = paletteIndexByColor.get(color);
+
+		if (paletteIndex === undefined) {
+			throw new Error(`Unknown palette color: ${color}`);
+		}
+
+		return paletteIndex;
+	});
+
+	return `0x${paletteIndexes.map((index) => index.toString(16).padStart(2, "0")).join("")}`;
+};
+
+const getSelectedOptions = (configuration: StuffItemConfiguration): StuffItemCart["options"] => {
+	return getOptions(configuration.stuffCollection).map(([name]) => {
+		const value = configuration.selectedOptions[name];
+
+		if (!value) {
+			throw new Error(`Missing option value for ${name}`);
+		}
+
+		return [name, value];
+	});
+};
+
+const getCartItem = (configuration: StuffItemConfiguration): StuffItemCart => {
+	return {
+		author: configuration.author,
+		canvas: getCanvas(configuration),
+		description: configuration.description,
+		options: getSelectedOptions(configuration),
+		stuffCollectionAddress: configuration.stuffCollection.address,
+		title: configuration.title,
+	};
+};
+
+const createDefaultConfiguration = (stuffCollection: StuffCollection): StuffItemConfiguration => {
 	const palette = getPalette(stuffCollection);
 
 	return {
@@ -75,8 +125,9 @@ const StuffItemConfiguratorProvider = ({
 	children,
 	stuffCollection,
 }: PropsWithChildren<{ stuffCollection: StuffCollection }>) => {
-	const addItem = useStuffCartStore((state) => state.addItem);
-	const [configuration, setConfiguration] = useState<StuffItemParams>(() =>
+	const addItem = useCartStore((state) => state.addItem);
+
+	const [configuration, setConfiguration] = useState<StuffItemConfiguration>(() =>
 		createDefaultConfiguration(stuffCollection),
 	);
 
@@ -115,12 +166,15 @@ const StuffItemConfiguratorProvider = ({
 			},
 			addToCart: () => {
 				if (!isConfigurationComplete) return;
-				window.scrollTo({ top: 0, behavior: "smooth" });
+				setConfiguration(createDefaultConfiguration(stuffCollection));
+				addItem(getCartItem(configuration));
 
-				addItem(configuration);
+				requestAnimationFrame(() => {
+					window.scrollTo({ top: 0, behavior: "smooth" });
+				});
 			},
 		}),
-		[addItem, configuration, isConfigurationComplete],
+		[addItem, configuration, isConfigurationComplete, stuffCollection],
 	);
 
 	return (
@@ -160,7 +214,6 @@ const StuffItemConfiguratorContent = () => {
 				</div>
 
 				<Grid
-					size={configuration.design.size}
 					palettes={palette}
 					pixels={configuration.design.pixels}
 					onPixelsChange={(pixels) =>
@@ -246,7 +299,7 @@ const StuffItemConfiguratorContent = () => {
 															...configuration.selectedOptions,
 															[name]: value,
 														},
-													} satisfies Partial<StuffItemParams>)
+													} satisfies Partial<StuffItemConfiguration>)
 												}
 											>
 												{value}

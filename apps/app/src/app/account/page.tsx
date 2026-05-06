@@ -28,7 +28,10 @@ const Page = () => {
 
 			<Account label="Your Stuff(s)">
 				{stuffItemsByOwner.map((item) => (
-					<AccountStuffItem key={item.id} stuffItem={item} />
+					<AccountStuffItem
+						key={`${item.stuffCollectionAddress}-${item.tokenId}`}
+						stuffItem={item}
+					/>
 				))}
 			</Account>
 		</Container>

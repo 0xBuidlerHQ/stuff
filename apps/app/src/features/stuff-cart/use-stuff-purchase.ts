@@ -73,7 +73,7 @@ const useStuffPurchase = (
 
 			const message = getReceiveWithAuthorizationMessage({
 				from: owner,
-				stuffAddress: configuration.stuffCollection.address,
+				stuffCollectionAddress: configuration.stuffCollection.address,
 				value: configuration.stuffCollection.mintPriceToken,
 			});
 

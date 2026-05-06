@@ -53,7 +53,7 @@ type MintAuthorization = {
 
 type MintRelayRequest = {
 	chainId: number;
-	stuffAddress: Address;
+	stuffCollectionAddress: Address;
 	recipient: Address;
 	mintParams: {
 		author: string;
@@ -128,18 +128,18 @@ const getAuthorizationNonce = () => {
 
 const getReceiveWithAuthorizationMessage = ({
 	from,
-	stuffAddress,
+	stuffCollectionAddress,
 	value,
 }: {
 	from: Address;
-	stuffAddress: Address;
+	stuffCollectionAddress: Address;
 	value: bigint;
 }) => {
 	const now = BigInt(Math.floor(Date.now() / 1000));
 
 	return {
 		from,
-		to: stuffAddress,
+		to: stuffCollectionAddress,
 		value,
 		validAfter: BigInt(0),
 		validBefore: now + BigInt(60 * 60),
@@ -159,7 +159,7 @@ const getMintRelayRequest = ({
 	owner: Address;
 }): MintRelayRequest => ({
 	chainId,
-	stuffAddress: configuration.stuffCollection.address,
+	stuffCollectionAddress: configuration.stuffCollection.address,
 	recipient: owner,
 	mintParams: getMintParams(configuration),
 	authorization: {

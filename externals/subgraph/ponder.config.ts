@@ -5,7 +5,7 @@ import { createConfig, factory } from "ponder";
 import { parseAbiItem } from "viem";
 
 const CHAIN_ID = "31337";
-const STARTBLOCK = 45606823;
+const STARTBLOCK = 45636851;
 const deploymentsByName = deployments as Record<string, Record<string, `0x${string}`>>;
 const STUFF_COLLECTION_FACTORY_ADDRESS =
 	deploymentsByName.StuffCollectionFactory?.[CHAIN_ID] ??

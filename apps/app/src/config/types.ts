@@ -23,6 +23,13 @@ type StuffItem = SubgraphTypes.StuffItem & {
 type StuffItemMintParams = StuffCollectionERC721.StuffItemMintParams;
 
 /**
+ * @dev UI StuffItemCart type.
+ */
+type StuffItemCart = StuffItemMintParams & {
+	stuffCollectionAddress: StuffCollection["address"];
+};
+
+/**
  * @dev
  */
 type StuffAssets = {
@@ -31,4 +38,4 @@ type StuffAssets = {
 	information: string[][];
 };
 
-export type { StuffCollection, StuffItem, StuffItemMintParams };
+export type { StuffCollection, StuffItem, StuffItemCart, StuffItemMintParams };

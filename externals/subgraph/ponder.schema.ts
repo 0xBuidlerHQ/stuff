@@ -1,5 +1,5 @@
 import type { StuffCollectionERC721 } from "@0xhq/stuff.contracts/types.user";
-import { onchainTable } from "ponder";
+import { onchainTable, primaryKey } from "ponder";
 
 type StuffCollection = StuffCollectionERC721.StuffCollection;
 
@@ -18,19 +18,24 @@ const stuffCollection = onchainTable("stuffCollection", (t) => ({
 	mintPriceToken: t.bigint().notNull(),
 }));
 
-const stuffItem = onchainTable("stuffItem", (t) => ({
-	id: t.bigint().primaryKey().notNull(),
-	stuffAddress: t.hex().notNull(),
-	tokenId: t.bigint().notNull(),
-	owner: t.hex().notNull(),
-	author: t.text().notNull(),
-	authorAddress: t.hex().notNull(),
-	title: t.text().notNull(),
-	description: t.text().notNull(),
-	creationDate: t.bigint().notNull(),
-	canvas: t.hex().notNull(),
-	options: t.jsonb().$type<string[][]>().notNull(),
-}));
+const stuffItem = onchainTable(
+	"stuffItem",
+	(t) => ({
+		stuffCollectionAddress: t.hex().notNull(),
+		tokenId: t.bigint().notNull(),
+		owner: t.hex().notNull(),
+		author: t.text().notNull(),
+		authorAddress: t.hex().notNull(),
+		title: t.text().notNull(),
+		description: t.text().notNull(),
+		creationDate: t.bigint().notNull(),
+		canvas: t.hex().notNull(),
+		options: t.jsonb().$type<string[][]>().notNull(),
+	}),
+	(table) => ({
+		pk: primaryKey({ columns: [table.stuffCollectionAddress, table.tokenId] }),
+	}),
+);
 
 namespace SubgraphTypes {
 	export type StuffCollection = typeof stuffCollection.$inferSelect;

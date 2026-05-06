@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import {
 	type Address,
 	type Chain,
-	type Hex,
 	createPublicClient,
 	createWalletClient,
+	type Hex,
 	http,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -57,7 +57,7 @@ const mintWithAuthorizationAbi = [
 
 type MintWithAuthorizationRequest = {
 	chainId: number;
-	stuffAddress: Address;
+	stuffCollectionAddress: Address;
 	recipient: Address;
 	mintParams: {
 		author: string;
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
 		const walletClient = createWalletClient({ account, chain, transport });
 
 		const configuredRelayer = await publicClient.readContract({
-			address: body.stuffAddress,
+			address: body.stuffCollectionAddress,
 			abi: mintWithAuthorizationAbi,
 			functionName: "relayer",
 		});
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
 		}
 
 		const { request: contractRequest } = await simulateContract(publicClient, {
-			address: body.stuffAddress,
+			address: body.stuffCollectionAddress,
 			abi: mintWithAuthorizationAbi,
 			functionName: "mintWithAuthorization",
 			account,

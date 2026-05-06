@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { links } from "@/config/links";
-import { useStuffCartStore } from "@/features/stuff-cart/store";
+import { CartNavigationItem } from "@/features/cart/cartNavigationItem";
 import { isActive, NavigationItem } from "@/layouts/header/navigation";
 import { Box } from "@/primitives/box";
 import { Button } from "@/primitives/button";
@@ -28,23 +28,9 @@ const LoadingButton = () => {
 const ConnectedButton = () => {
 	const pathname = usePathname();
 
-	const cart = useStuffCartStore();
-
 	return (
 		<Box className="flex gap-2 h-8 items-center text-sm font-medium">
-			<Box className="relative">
-				<NavigationItem
-					key={links.cart.name}
-					isActive={isActive(pathname, links.cart.url)}
-					{...links.cart}
-				/>
-
-				{cart.items.length > 0 && (
-					<Box className="absolute -top-3 right-0.5 text-[10px] text-red-500 font-semibold">
-						{cart.items.length}
-					</Box>
-				)}
-			</Box>
+			<CartNavigationItem />
 
 			<NavigationItem
 				key={links.account.name}

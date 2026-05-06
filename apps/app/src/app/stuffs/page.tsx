@@ -8,6 +8,8 @@ const Page = async () => {
 
 	return (
 		<Container>
+			<Box className="text-8xl">STUFFS</Box>
+
 			<Box className="grid grid-cols-4 mobile:grid-cols-1 gap-4">
 				<StuffCollections stuffCollections={stuffCollections} />
 			</Box>

@@ -1,6 +1,5 @@
 import { ponder } from "ponder:registry";
 import schema from "ponder:schema";
-import { stuffCollectionErc721Abi } from "@0xhq/stuff.contracts";
 import { eq } from "ponder";
 import type { Address } from "viem";
 
@@ -36,7 +35,6 @@ ponder.on("StuffCollectionERC721:StuffItemCreated", async ({ event, context }) =
 	const options = stuffItem.options.map((option) => [...option]);
 
 	await context.db.insert(schema.stuffItem).values({
-		id: stuffItem.id,
 		author: stuffItem.author,
 		authorAddress: stuffItem.authorAddress,
 		title: stuffItem.title,
@@ -45,7 +43,7 @@ ponder.on("StuffCollectionERC721:StuffItemCreated", async ({ event, context }) =
 		canvas: stuffItem.canvas,
 		options: options,
 		//
-		stuffAddress: event.log.address,
+		stuffCollectionAddress: event.log.address,
 		tokenId: event.args.tokenId,
 		owner: event.args.to.toLowerCase() as Address,
 	});
@@ -67,14 +65,12 @@ ponder.on("StuffCollectionERC721:StuffItemCreated", async ({ event, context }) =
  * @dev StuffCollectionERC721:Transfer keeps mutable ERC721 ownership state fresh on the indexed item row.
  */
 ponder.on("StuffCollectionERC721:Transfer", async ({ event, context }) => {
-	const stuffItem = await context.client.readContract({
-		abi: stuffCollectionErc721Abi,
-		address: event.log.address,
-		functionName: "getStuffItem",
-		args: [event.args.tokenId],
-	});
-
-	await context.db.update(schema.stuffItem, { id: stuffItem.id }).set({
-		owner: event.args.to.toLowerCase() as Address,
-	});
+	await context.db
+		.update(schema.stuffItem, {
+			stuffCollectionAddress: event.log.address,
+			tokenId: event.args.tokenId,
+		})
+		.set({
+			owner: event.args.to.toLowerCase() as Address,
+		});
 });

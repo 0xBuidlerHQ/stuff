@@ -19,7 +19,6 @@ const WallPieceCard = ({ piece, stuff }: { piece: WallPiece; stuff: Stuff }) => 
 			className="grid gap-2 text-left"
 		>
 			<GridPreview
-				size={42}
 				pixels={piece.pixels}
 				className="border-border transition hover:border-foreground"
 			/>

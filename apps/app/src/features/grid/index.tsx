@@ -7,16 +7,17 @@ import { Button } from "@/primitives/button";
 import { cn } from "@/utils";
 
 const EMPTY_COLOR = "transparent";
+const CANVAS_SIZE = 42;
 
 type GridProps = {
-	size: number;
+	size?: number;
 	palettes: string[];
 	pixels: string[];
 	onPixelsChange: (pixels: string[]) => void;
 };
 
 type GridPreviewProps = {
-	size: number;
+	size?: number;
 	pixels: string[];
 	className?: string;
 };
@@ -131,13 +132,22 @@ const getDefaultPixels = (size: number, firstColor: string, secondColor: string)
 	return pixels;
 };
 
-const GridPreview = ({ size, pixels, className }: GridPreviewProps) => {
+const decodeCanvasToPixels = (canvas: string, palette: readonly string[]) => {
+	const hex = canvas.startsWith("0x") ? canvas.slice(2) : canvas;
+	const pixels: string[] = [];
+
+	for (let index = 0; index < hex.length; index += 2) {
+		const paletteIndex = Number.parseInt(hex.slice(index, index + 2), 16);
+		pixels.push(palette[paletteIndex] ?? EMPTY_COLOR);
+	}
+
+	return pixels;
+};
+
+const GridPreview = ({ size = CANVAS_SIZE, pixels, className }: GridPreviewProps) => {
 	return (
 		<div
-			className={cn(
-				"grid aspect-square w-full overflow-hidden border border-muted bg-background",
-				className,
-			)}
+			className={cn("grid aspect-square w-full overflow-hidden bg-background", className)}
 			style={{
 				gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
 				gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,
@@ -249,7 +259,7 @@ const PixelCanvas = ({
 
 	return (
 		<div
-			className="grid aspect-square w-full touch-none overflow-hidden border border-muted-foreground bg-background"
+			className="grid aspect-square w-full touch-none overflow-hidden bg-background"
 			style={{
 				gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
 				gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,
@@ -279,7 +289,7 @@ const PixelCanvas = ({
 	);
 };
 
-const Grid = ({ size, palettes, pixels, onPixelsChange }: GridProps) => {
+const Grid = ({ size = CANVAS_SIZE, palettes, pixels, onPixelsChange }: GridProps) => {
 	const maxBrushSize = Math.max(1, Math.min(size, 8));
 	const [selectedColor, setSelectedColor] = useState<string>(palettes[0] ?? EMPTY_COLOR);
 	const firstColor = palettes[0] ?? EMPTY_COLOR;
@@ -467,4 +477,4 @@ const Grid = ({ size, palettes, pixels, onPixelsChange }: GridProps) => {
 	);
 };
 
-export { Grid, GridPreview, getDefaultPixels };
+export { CANVAS_SIZE, decodeCanvasToPixels, Grid, GridPreview, getDefaultPixels };
