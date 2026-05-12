@@ -1,61 +1,59 @@
 "use client";
 
-import Link from "next/link";
-import { links } from "@/config/links";
-import { GridPreview } from "@/features/grid";
-import type { Stuff, WallPiece } from "@/features/stuff/types";
+import { useEffect, useRef, useState } from "react";
+import { decodeCanvasToPixels, GridPreview } from "@/features/grid";
 import { Box } from "@/primitives/box";
-import { Container } from "@/primitives/container";
+import { useStuffItems } from "@/queries/useStuffItems";
 
-type StuffWallProps = {
-	stuff: Stuff;
-	pieces: WallPiece[];
-};
+const INITIAL_VISIBLE_COUNT = 36;
+const LOAD_MORE_COUNT = 24;
 
-const WallPieceCard = ({ piece, stuff }: { piece: WallPiece; stuff: Stuff }) => {
-	return (
-		<Link
-			href={`${links.wall.url}/${stuff.slug}/${piece.tokenId.toString()}`}
-			className="grid gap-2 text-left"
-		>
-			<GridPreview
-				pixels={piece.pixels}
-				className="border-border transition hover:border-foreground"
-			/>
-			<Box className="grid gap-0.5">
-				<Box className="text-sm">{piece.stuff.title || `#${piece.tokenId}`}</Box>
-				<Box className="text-xs text-muted-foreground">{piece.stuff.author || "-"}</Box>
-			</Box>
-		</Link>
-	);
-};
+const StuffWall = () => {
+	const [limit, setLimit] = useState(INITIAL_VISIBLE_COUNT);
+	const sentinelRef = useRef<HTMLDivElement | null>(null);
+	const { q, stuffItems } = useStuffItems({ limit });
+	const hasMore = (q.data?.length ?? 0) >= limit;
 
-const StuffWallSection = ({ stuff, pieces }: StuffWallProps) => {
+	useEffect(() => {
+		if (!hasMore) return;
+
+		const sentinel = sentinelRef.current;
+		if (!sentinel) return;
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (!entry.isIntersecting) return;
+
+				setLimit((currentLimit) => currentLimit + LOAD_MORE_COUNT);
+			},
+			{ rootMargin: "800px 0px" },
+		);
+
+		observer.observe(sentinel);
+
+		return () => observer.disconnect();
+	}, [hasMore]);
+
 	return (
 		<Box className="grid gap-4">
-			<Box className="grid gap-2">
-				<Box className="text-4xl">{stuff.sku}</Box>
+			<Box className="grid grid-cols-2 gap-0 desktop:grid-cols-6">
+				{stuffItems.map((stuffItem) => {
+					const pixels = decodeCanvasToPixels(stuffItem.canvas, stuffItem.collection.palette);
+
+					return (
+						<GridPreview
+							key={`${stuffItem.stuffCollectionAddress}-${stuffItem.tokenId.toString()}`}
+							pixels={pixels}
+							className="border border-border"
+						/>
+					);
+				})}
 			</Box>
 
-			<Box className="grid grid-cols-2 gap-4 desktop:grid-cols-6">
-				{pieces.map((piece) => (
-					<WallPieceCard
-						key={`${stuff.slug}-${piece.tokenId.toString()}`}
-						piece={piece}
-						stuff={stuff}
-					/>
-				))}
-			</Box>
+			{q.isLoading && <Box className="h-24" />}
+			<div ref={sentinelRef} className="h-px" />
 		</Box>
 	);
 };
 
-const StuffWall = ({ stuff, pieces }: StuffWallProps) => {
-	return (
-		<Container>
-			<StuffWallSection stuff={stuff} pieces={pieces} />
-		</Container>
-	);
-};
-
-export { StuffWall, StuffWallSection };
+export { StuffWall };

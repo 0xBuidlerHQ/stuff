@@ -1,16 +1,19 @@
 import { Beaut } from "@0xhq/beaut";
+import { links } from "@/config/links";
 import type { StuffCollection, StuffItemCart } from "@/config/types";
+import { decodeCanvasToPixels, GridPreview } from "@/features/grid";
 import { Box } from "@/primitives/box";
 import { ButtonPrimary } from "@/primitives/button";
 
 type OrderSummaryProps = {
 	items: StuffItemCart[];
 	stuffCollectionsByAddress: Map<string, StuffCollection>;
+	checkoutCTA?: boolean;
 };
 
 const formatMoney = (amount: bigint) => Beaut.money(Number(Beaut.bigint(amount, 6)));
 
-const OrderSummary = (props: OrderSummaryProps) => {
+const CartWidget = (props: OrderSummaryProps) => {
 	const summaryItems = props.items
 		.map((item) => {
 			const stuffCollection = props.stuffCollectionsByAddress.get(
@@ -36,7 +39,7 @@ const OrderSummary = (props: OrderSummaryProps) => {
 		<Box className="flex min-h-90 flex-col border border-border bg-background">
 			<Box className="grid min-h-0 flex-1 content-start gap-5 overflow-y-auto p-4">
 				<Box className="flex items-center justify-between gap-4">
-					<Box className="text-lg uppercase">Order Summary</Box>
+					<Box className="text-lg uppercase">Cart</Box>
 					<Box className="text-sm text-muted-foreground">{summaryItems.length} item(s)</Box>
 				</Box>
 
@@ -44,20 +47,28 @@ const OrderSummary = (props: OrderSummaryProps) => {
 					{summaryItems.length === 0 ? (
 						<Box className="text-sm text-muted-foreground">Your cart is empty.</Box>
 					) : (
-						summaryItems.map(({ id, item, stuffCollection }) => (
-							<Box key={id} className="grid gap-1 border-b border-border pb-3 last:border-b-0">
-								<Box className="flex items-start justify-between gap-4">
-									<Box className="min-w-0">
-										<Box className="text-sm">{item.title || stuffCollection.sku}</Box>
-										<Box className="text-xs text-muted-foreground">{stuffCollection.sku}</Box>
-									</Box>
+						summaryItems.map(({ id, item, stuffCollection }) => {
+							const pixels = decodeCanvasToPixels(item.canvas, stuffCollection.palette);
 
-									<Box className="shrink-0 text-sm">
-										{formatMoney(stuffCollection.mintPriceToken)}
+							return (
+								<Box key={id} className="grid gap-1 border-b border-border pb-3 last:border-b-0">
+									<Box className="flex items-start gap-4">
+										<Box>
+											<GridPreview pixels={pixels} />
+										</Box>
+
+										<Box className="min-w-0 grow">
+											<Box className="text-sm">{item.title || stuffCollection.sku}</Box>
+											<Box className="text-xs text-muted-foreground">{stuffCollection.sku}</Box>
+										</Box>
+
+										<Box className="shrink-0 text-sm">
+											{formatMoney(stuffCollection.mintPriceToken)}
+										</Box>
 									</Box>
 								</Box>
-							</Box>
-						))
+							);
+						})
 					)}
 				</Box>
 			</Box>
@@ -68,12 +79,14 @@ const OrderSummary = (props: OrderSummaryProps) => {
 					<Box className="text-2xl">{formatMoney(total)}</Box>
 				</Box>
 
-				<ButtonPrimary disabled={summaryItems.length === 0} className="flex w-full justify-center">
-					Pay
-				</ButtonPrimary>
+				{props.checkoutCTA && (
+					<ButtonPrimary href={links.checkout.url} disabled={summaryItems.length === 0}>
+						Checkout
+					</ButtonPrimary>
+				)}
 			</Box>
 		</Box>
 	);
 };
 
-export { OrderSummary };
+export { CartWidget };

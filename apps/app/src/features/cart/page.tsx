@@ -2,7 +2,7 @@
 
 import type { StuffCollection } from "@/config/types";
 import { CartItem } from "@/features/cart/cartItem";
-import { OrderSummary } from "@/features/cart/orderSummary";
+import { CartWidget } from "@/features/cart/cartWidget";
 import { useCartStore } from "@/features/cart/store";
 import { Box } from "@/primitives/box";
 
@@ -40,8 +40,9 @@ const CartPage = (props: CartPageProps) => {
 				})}
 			</Box>
 
-			<Box className="desktop:sticky desktop:top-2 desktop:col-span-4 desktop:h-[calc(100dvh-1rem)] desktop:self-start">
-				<OrderSummary
+			<Box className="desktop:sticky desktop:top-2 desktop:col-span-4 desktop:self-start">
+				<CartWidget
+					checkoutCTA
 					items={cartStore.items}
 					stuffCollectionsByAddress={stuffCollectionsByAddress}
 				/>

@@ -3,7 +3,10 @@
 import { eq } from "@ponder/client";
 import { usePonderQuery } from "@ponder/react";
 import type { Address } from "viem";
+import type { StuffItem } from "@/config/types";
 import { ponderSchema } from "@/providers/ponder.config";
+import { augmentStuffItem } from "@/queries/augments";
+import { useStuffCollections } from "@/queries/useStuffCollections";
 
 type UseQStuffItemsByOwnerProps = {
 	owner: Address | undefined;
@@ -29,10 +32,16 @@ type UseStuffItemsByOwnerProps = {
 };
 const useStuffItemsByOwner = (props: UseStuffItemsByOwnerProps) => {
 	const query = useQStuffItemsByOwner({ owner: props.owner });
+	const { stuffCollectionsByAddress } = useStuffCollections();
+
+	const stuffItemsByOwner: StuffItem[] = (query.data ?? [])
+		.map((stuffItem) => augmentStuffItem(stuffItem, stuffCollectionsByAddress))
+		.filter((stuffItem): stuffItem is StuffItem => stuffItem !== null);
 
 	return {
 		q: query,
-		stuffItemsByOwner: query.data || [],
+
+		stuffItemsByOwner,
 	};
 };
 

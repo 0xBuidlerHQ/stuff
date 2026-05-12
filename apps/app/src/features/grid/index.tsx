@@ -147,7 +147,10 @@ const decodeCanvasToPixels = (canvas: string, palette: readonly string[]) => {
 const GridPreview = ({ size = CANVAS_SIZE, pixels, className }: GridPreviewProps) => {
 	return (
 		<div
-			className={cn("grid aspect-square w-full overflow-hidden bg-background", className)}
+			className={cn(
+				"grid aspect-square w-full overflow-hidden border border-muted bg-background",
+				className,
+			)}
 			style={{
 				gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
 				gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,
@@ -259,7 +262,7 @@ const PixelCanvas = ({
 
 	return (
 		<div
-			className="grid aspect-square w-full touch-none overflow-hidden bg-background"
+			className="grid aspect-square w-full touch-none overflow-hidden border border-muted-foreground bg-background"
 			style={{
 				gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
 				gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,

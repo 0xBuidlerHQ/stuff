@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { MouseEventHandler } from "react";
+import { Box } from "@/primitives/box";
 import { cn } from "@/utils";
 
 interface ButtonBaseProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -25,17 +26,19 @@ const Button = (props: ButtonBaseProps) => {
 
 	if (href)
 		return (
-			<div
-				className={cn(
-					"group hover:cursor-pointer overflow-hidden",
-					className,
-					disabled && "pointer-events-none!",
-				)}
-			>
-				<Link target={external ? "_blank" : undefined} href={href ?? "https://google.com"}>
+			<Box className="relative inline-flex">
+				<Link
+					target={external ? "_blank" : undefined}
+					href={href ?? "https://google.com"}
+					className={cn(
+						"group hover:cursor-pointer overflow-hidden",
+						className,
+						disabled && "pointer-events-none! opacity-50",
+					)}
+				>
 					{children}
 				</Link>
-			</div>
+			</Box>
 		);
 
 	const onClickFct = type === "submit" ? () => {} : onClick;
@@ -45,7 +48,7 @@ const Button = (props: ButtonBaseProps) => {
 			className={cn(
 				"group relative hover:cursor-pointer",
 				className,
-				disabled && "pointer-events-none!",
+				disabled && "pointer-events-none! opacity-50",
 			)}
 			onClick={onClickFct}
 			disabled={disabled}
@@ -62,8 +65,7 @@ const ButtonPrimary = (props: ButtonBaseProps) => {
 	return (
 		<Button
 			className={cn(
-				"bg-foreground px-4 py-3 text-background transition-opacity hover:opacity-90",
-				props.disabled && "opacity-50",
+				"bg-foreground w-full flex items-center justify-center px-4 py-3 text-background transition-opacity hover:opacity-90",
 				className,
 			)}
 			{...rest}

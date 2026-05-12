@@ -1729,6 +1729,43 @@ export const stuffCollectionErc721Abi = [
       { name: '_to', internalType: 'address', type: 'address' },
       {
         name: '_params',
+        internalType: 'struct StuffCollectionERC721.StuffItemMintParams[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'author', internalType: 'string', type: 'string' },
+          { name: 'title', internalType: 'string', type: 'string' },
+          { name: 'description', internalType: 'string', type: 'string' },
+          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'options', internalType: 'string[][]', type: 'string[][]' },
+        ],
+      },
+      {
+        name: '_authorization',
+        internalType: 'struct StuffCollectionERC721.MintAuthorization',
+        type: 'tuple',
+        components: [
+          { name: 'from', internalType: 'address', type: 'address' },
+          { name: 'validAfter', internalType: 'uint256', type: 'uint256' },
+          { name: 'validBefore', internalType: 'uint256', type: 'uint256' },
+          { name: 'nonce', internalType: 'bytes32', type: 'bytes32' },
+          { name: 'v', internalType: 'uint8', type: 'uint8' },
+          { name: 'r', internalType: 'bytes32', type: 'bytes32' },
+          { name: 's', internalType: 'bytes32', type: 'bytes32' },
+        ],
+      },
+    ],
+    name: 'mintBatchWithAuthorization',
+    outputs: [
+      { name: 'stuffItemIds', internalType: 'uint256[]', type: 'uint256[]' },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_to', internalType: 'address', type: 'address' },
+      {
+        name: '_params',
         internalType: 'struct StuffCollectionERC721.StuffItemMintParams',
         type: 'tuple',
         components: [

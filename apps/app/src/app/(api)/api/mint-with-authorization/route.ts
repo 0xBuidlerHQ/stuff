@@ -15,13 +15,13 @@ import { env } from "@/config/env";
 const mintWithAuthorizationAbi = [
 	{
 		type: "function",
-		name: "mintWithAuthorization",
+		name: "mintBatchWithAuthorization",
 		stateMutability: "nonpayable",
 		inputs: [
 			{ name: "_to", type: "address" },
 			{
 				name: "_params",
-				type: "tuple",
+				type: "tuple[]",
 				components: [
 					{ name: "author", type: "string" },
 					{ name: "title", type: "string" },
@@ -44,7 +44,7 @@ const mintWithAuthorizationAbi = [
 				],
 			},
 		],
-		outputs: [{ name: "tokenId", type: "uint256" }],
+		outputs: [{ name: "stuffItemIds", type: "uint256[]" }],
 	},
 	{
 		type: "function",
@@ -55,17 +55,19 @@ const mintWithAuthorizationAbi = [
 	},
 ] as const;
 
+type MintParams = {
+	author: string;
+	title: string;
+	description: string;
+	canvas: Hex;
+	options: string[][];
+};
+
 type MintWithAuthorizationRequest = {
 	chainId: number;
 	stuffCollectionAddress: Address;
 	recipient: Address;
-	mintParams: {
-		author: string;
-		title: string;
-		description: string;
-		canvas: Hex;
-		options: string[][];
-	};
+	mintParams: MintParams | MintParams[];
 	authorization: {
 		from: Address;
 		validAfter: string;
@@ -100,6 +102,11 @@ export async function POST(request: Request) {
 	try {
 		const body = (await request.json()) as MintWithAuthorizationRequest;
 		const relayerPrivateKey = env.RELAYER_PRIVATE_KEY as Hex;
+		const mintParams = Array.isArray(body.mintParams) ? body.mintParams : [body.mintParams];
+
+		if (mintParams.length === 0) {
+			return NextResponse.json({ error: "No mint params provided." }, { status: 400 });
+		}
 
 		const chain = chainById[body.chainId];
 		const rpcUrl = getRpcUrl(body.chainId);
@@ -129,11 +136,11 @@ export async function POST(request: Request) {
 		const { request: contractRequest } = await simulateContract(publicClient, {
 			address: body.stuffCollectionAddress,
 			abi: mintWithAuthorizationAbi,
-			functionName: "mintWithAuthorization",
+			functionName: "mintBatchWithAuthorization",
 			account,
 			args: [
 				body.recipient,
-				body.mintParams,
+				mintParams,
 				{
 					from: body.authorization.from,
 					validAfter: BigInt(body.authorization.validAfter),

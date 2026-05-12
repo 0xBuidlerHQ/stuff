@@ -27,12 +27,14 @@ const Page = () => {
 			<Box className="text-8xl">ACCOUNT</Box>
 
 			<Account label="Your Stuff(s)">
-				{stuffItemsByOwner.map((item) => (
-					<AccountStuffItem
-						key={`${item.stuffCollectionAddress}-${item.tokenId}`}
-						stuffItem={item}
-					/>
-				))}
+				<Box className="grid gap-4">
+					{stuffItemsByOwner.map((item) => (
+						<AccountStuffItem
+							key={`${item.stuffCollectionAddress}-${item.tokenId}`}
+							stuffItem={item}
+						/>
+					))}
+				</Box>
 			</Account>
 		</Container>
 	);

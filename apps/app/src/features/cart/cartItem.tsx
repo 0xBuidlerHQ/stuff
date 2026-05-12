@@ -50,7 +50,7 @@ const CartItem = (props: CartItemProps) => {
 					<GridPreview pixels={pixels} />
 				</Box>
 
-				<Box className="absolute right-3 bottom-3 aspect-square w-16 overflow-hidden border border-border bg-muted desktop:w-20">
+				<Box className="absolute right-0 bottom-0 aspect-square w-16 overflow-hidden border border-border bg-muted desktop:w-20">
 					<Image
 						fill
 						className="object-cover"

@@ -239,6 +239,38 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
     }
 
     /**
+     * @dev mintBatchWithAuthorization.
+     */
+    function mintBatchWithAuthorization(
+        address _to,
+        StuffItemMintParams[] calldata _params,
+        MintAuthorization calldata _authorization
+    ) external onlyRelayer returns (uint256[] memory stuffItemIds) {
+        uint256 totalPrice = MINT_PRICE_TOKEN * _params.length;
+
+        IERC3009(address(PAYMENT_TOKEN))
+            .receiveWithAuthorization(
+                _authorization.from,
+                address(this),
+                totalPrice,
+                _authorization.validAfter,
+                _authorization.validBefore,
+                _authorization.nonce,
+                _authorization.v,
+                _authorization.r,
+                _authorization.s
+            );
+
+        PAYMENT_TOKEN.safeTransfer(PAYMENT_RECIPIENT, totalPrice);
+
+        stuffItemIds = new uint256[](_params.length);
+
+        for (uint256 i = 0; i < _params.length; i++) {
+            stuffItemIds[i] = _mintStuffItem(_to, _authorization.from, _params[i]);
+        }
+    }
+
+    /**
      * @dev getStuffCollection.
      */
     function getStuffCollection() public view returns (StuffCollection memory stuffCollection) {

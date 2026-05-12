@@ -5,7 +5,7 @@ import type { Address } from "viem";
 import { parseSignature } from "viem";
 import { useConfig, useWalletClient } from "wagmi";
 import { readContract } from "wagmi/actions";
-import type { StuffItemParams } from "@/features/stuff/types";
+import type { StuffCollection, StuffItemCart } from "@/config/types";
 import { useWeb3 } from "@/providers/web3";
 import {
 	erc3009MetadataAbi,
@@ -15,7 +15,8 @@ import {
 } from "./purchase";
 
 const useStuffPurchase = (
-	configuration?: StuffItemParams,
+	cartItem?: StuffItemCart,
+	stuffCollection?: StuffCollection,
 	options?: { onSuccess?: () => void },
 ) => {
 	const config = useConfig();
@@ -25,7 +26,7 @@ const useStuffPurchase = (
 	const [isPending, setIsPending] = useState(false);
 
 	const pay = async () => {
-		if (!configuration) return;
+		if (!cartItem || !stuffCollection) return;
 
 		if (!isConnected || !eoa.address) {
 			connect();
@@ -47,7 +48,7 @@ const useStuffPurchase = (
 			setErrorMessage(null);
 
 			const owner = eoa.address as Address;
-			const paymentToken = configuration.stuffCollection.paymentToken as Address;
+			const paymentToken = stuffCollection.paymentToken as Address;
 			const [name, version, balance] = await Promise.all([
 				readContract(config, {
 					abi: erc3009MetadataAbi,
@@ -67,14 +68,14 @@ const useStuffPurchase = (
 				}),
 			]);
 
-			if (balance < configuration.stuffCollection.mintPriceToken) {
+			if (balance < stuffCollection.mintPriceToken) {
 				throw new Error("Insufficient USDC balance for this mint.");
 			}
 
 			const message = getReceiveWithAuthorizationMessage({
 				from: owner,
-				stuffCollectionAddress: configuration.stuffCollection.address,
-				value: configuration.stuffCollection.mintPriceToken,
+				stuffCollectionAddress: stuffCollection.address,
+				value: stuffCollection.mintPriceToken,
 			});
 
 			const signature = await walletClient.signTypedData({
@@ -109,9 +110,10 @@ const useStuffPurchase = (
 							r: parsedSignature.r,
 							s: parsedSignature.s,
 						},
+						cartItem,
 						chainId: eoa.chain.id,
-						configuration,
 						owner,
+						stuffCollection,
 					}),
 				),
 			});

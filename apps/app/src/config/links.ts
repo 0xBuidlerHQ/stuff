@@ -27,6 +27,10 @@ const links = {
 		name: "cart",
 		url: "/cart",
 	},
+	checkout: {
+		name: "checkout",
+		url: "/checkout",
+	},
 	about: {
 		name: "about",
 		url: "/about",

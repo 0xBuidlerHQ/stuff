@@ -2,9 +2,7 @@
 
 import type { Address, Hex } from "viem";
 import { toHex } from "viem";
-import type { StuffItemParams } from "@/features/stuff/types";
-
-const MAX_PALETTE_COLORS = 256;
+import type { StuffCollection, StuffItemCart } from "@/config/types";
 
 const erc3009MetadataAbi = [
 	{
@@ -61,7 +59,7 @@ type MintRelayRequest = {
 		description: string;
 		canvas: Hex;
 		options: string[][];
-	};
+	}[];
 	authorization: {
 		from: Address;
 		validAfter: string;
@@ -73,50 +71,12 @@ type MintRelayRequest = {
 	};
 };
 
-const getMintCanvas = (configuration: StuffItemParams) => {
-	const palette = Array.isArray(configuration.stuffCollection.palette)
-		? configuration.stuffCollection.palette
-				.slice(0, MAX_PALETTE_COLORS)
-				.filter((color): color is string => typeof color === "string")
-		: [];
-	const paletteIndexByColor = new Map(palette.map((color, index) => [color, index] as const));
-	const paletteIndexes = configuration.design.pixels.map((color) => {
-		const paletteIndex = paletteIndexByColor.get(color);
-
-		if (paletteIndex === undefined) {
-			throw new Error(`Unknown palette color: ${color}`);
-		}
-
-		return paletteIndex;
-	});
-
-	return toHex(Uint8Array.from(paletteIndexes));
-};
-
-const getMintOptions = (configuration: StuffItemParams) => {
-	const options = Array.isArray(configuration.stuffCollection.options)
-		? configuration.stuffCollection.options
-				.filter((option): option is string[] => Array.isArray(option))
-				.map((option) => option.filter((value): value is string => typeof value === "string"))
-		: [];
-
-	return options.map(([name]) => {
-		const value = configuration.selectedOptions[name];
-
-		if (!value) {
-			throw new Error(`Missing option value for ${name}`);
-		}
-
-		return [name, value];
-	});
-};
-
-const getMintParams = (configuration: StuffItemParams) => ({
-	author: configuration.author,
-	canvas: getMintCanvas(configuration),
-	description: configuration.description,
-	options: getMintOptions(configuration),
-	title: configuration.title,
+const getMintParams = (cartItem: StuffItemCart) => ({
+	author: cartItem.author,
+	canvas: cartItem.canvas as Hex,
+	description: cartItem.description,
+	options: cartItem.options,
+	title: cartItem.title,
 });
 
 const getAuthorizationNonce = () => {
@@ -149,19 +109,21 @@ const getReceiveWithAuthorizationMessage = ({
 
 const getMintRelayRequest = ({
 	authorization,
+	cartItem,
 	chainId,
-	configuration,
 	owner,
+	stuffCollection,
 }: {
 	authorization: MintAuthorization;
+	cartItem: StuffItemCart;
 	chainId: number;
-	configuration: StuffItemParams;
 	owner: Address;
+	stuffCollection: StuffCollection;
 }): MintRelayRequest => ({
 	chainId,
-	stuffCollectionAddress: configuration.stuffCollection.address,
+	stuffCollectionAddress: stuffCollection.address,
 	recipient: owner,
-	mintParams: getMintParams(configuration),
+	mintParams: [getMintParams(cartItem)],
 	authorization: {
 		from: authorization.from,
 		validAfter: authorization.validAfter.toString(),
