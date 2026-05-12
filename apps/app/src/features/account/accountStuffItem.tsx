@@ -1,9 +1,20 @@
+"use client";
+
 import { Beaut } from "@0xhq/beaut";
+import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import type { PropsWithChildren } from "react";
 import type { StuffItem } from "@/config/types";
 import { decodeCanvasToPixels, GridPreview } from "@/features/grid";
 import { Box } from "@/primitives/box";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/shadcn/dialog";
 
 type AccountStuffItemFieldProps = {
 	label: string;
@@ -27,81 +38,121 @@ const AccountStuffItem = (props: AccountStuffItemProps) => {
 	const collection = stuffItem.collection;
 	const pixels = decodeCanvasToPixels(stuffItem.canvas, collection.palette);
 	const creationDate = new Date(Number(stuffItem.creationDate) * 1000);
+	const displayTitle = stuffItem.title || `#${stuffItem.tokenId}`;
+	const displayPrice = Beaut.money(Number(Beaut.bigint(collection.mintPriceToken, 6)));
+	const displayCreationDate = Number.isNaN(creationDate.getTime())
+		? stuffItem.creationDate.toString()
+		: creationDate.toLocaleString();
 
 	return (
-		<Box className="grid border border-border bg-background desktop:grid-cols-12">
-			<Box className="relative desktop:col-span-4">
-				<Box className="relative aspect-square overflow-hidden bg-muted">
-					<GridPreview pixels={pixels} />
+		<Dialog>
+			<Box className="flex items-center gap-3 border border-border bg-background p-2 desktop:gap-4">
+				<Box className="flex shrink-0 items-center gap-2">
+					<Box className="relative size-18 overflow-hidden bg-muted desktop:size-22">
+						<GridPreview pixels={pixels} />
+					</Box>
+
+					<Box className="relative size-18 overflow-hidden bg-muted desktop:size-22">
+						<Image
+							fill
+							className="object-cover"
+							src={collection.assets.images[0]}
+							alt={collection.sku}
+						/>
+					</Box>
 				</Box>
 
-				<Box className="absolute right-0 bottom-0 aspect-square w-16 overflow-hidden border border-border bg-muted desktop:w-20">
-					<Image
-						fill
-						className="object-cover"
-						src={collection.assets.images[0]}
-						alt={collection.sku}
-					/>
+				<Box className="grid min-w-0 flex-1 gap-1 py-2">
+					<Box className="truncate text-base desktop:text-xl">{displayTitle}</Box>
+					<Box className="flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground desktop:text-sm">
+						<Box className="truncate">{collection.sku}</Box>
+						<Box>{displayPrice}</Box>
+						<Box>#{stuffItem.tokenId.toString()}</Box>
+					</Box>
 				</Box>
+
+				<DialogTrigger asChild>
+					<button
+						type="button"
+						className="flex size-10 shrink-0 items-center justify-center bg-foreground text-background transition-opacity hover:opacity-90"
+						aria-label={`Open details for ${displayTitle}`}
+					>
+						<ChevronRight className="size-5" aria-hidden />
+					</button>
+				</DialogTrigger>
 			</Box>
 
-			<Box className="grid min-w-0 gap-4 p-4 desktop:col-span-8">
-				<Box className="flex flex-wrap items-start justify-between gap-4">
-					<Box className="min-w-0">
-						<Box className="text-xl">{stuffItem.title || `#${stuffItem.tokenId}`}</Box>
-						<Box className="text-sm text-muted-foreground">{collection.sku}</Box>
+			<DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
+				<DialogHeader>
+					<DialogTitle>{displayTitle}</DialogTitle>
+					<DialogDescription>
+						{collection.sku} / {displayPrice} / #{stuffItem.tokenId.toString()}
+					</DialogDescription>
+				</DialogHeader>
+
+				<Box className="grid gap-4">
+					<Box className="grid grid-cols-2 gap-2">
+						<Box className="relative aspect-square overflow-hidden bg-muted">
+							<GridPreview pixels={pixels} />
+						</Box>
+
+						<Box className="relative aspect-square overflow-hidden bg-muted">
+							<Image
+								fill
+								className="object-cover"
+								src={collection.assets.images[0]}
+								alt={collection.sku}
+							/>
+						</Box>
 					</Box>
 
-					<Box className="text-right text-sm">
-						<Box>{Beaut.money(Number(Beaut.bigint(collection.mintPriceToken, 6)))}</Box>
-						<Box className="text-muted-foreground">#{stuffItem.tokenId.toString()}</Box>
+					<Box className="grid gap-2 desktop:grid-cols-2">
+						<AccountStuffItemField label="SKU">{collection.sku}</AccountStuffItemField>
+
+						<AccountStuffItemField label="Price">{displayPrice}</AccountStuffItemField>
+
+						<AccountStuffItemField label="Author">{stuffItem.author}</AccountStuffItemField>
+
+						<AccountStuffItemField label="Author address">
+							{stuffItem.authorAddress}
+						</AccountStuffItemField>
+
+						<AccountStuffItemField label="Owner">{stuffItem.owner}</AccountStuffItemField>
+
+						<AccountStuffItemField label="Collection address">
+							{stuffItem.stuffCollectionAddress}
+						</AccountStuffItemField>
+
+						<AccountStuffItemField label="Creation date">
+							{displayCreationDate}
+						</AccountStuffItemField>
+
+						<AccountStuffItemField label="Internal id">
+							{stuffItem.tokenId.toString()}
+						</AccountStuffItemField>
 					</Box>
+
+					<AccountStuffItemField label="Description">
+						{stuffItem.description || "-"}
+					</AccountStuffItemField>
+
+					<AccountStuffItemField label="Options">
+						<Box className="grid gap-1">
+							{stuffItem.options.length > 0 ? (
+								stuffItem.options.map(([name, value]) => (
+									<Box key={name} className="flex gap-2 text-sm">
+										<Box className="capitalize text-muted-foreground">{name}:</Box>
+										<Box>{value}</Box>
+									</Box>
+								))
+							) : (
+								<Box>-</Box>
+							)}
+						</Box>
+					</AccountStuffItemField>
 				</Box>
-
-				<Box className="grid gap-2 desktop:grid-cols-2">
-					<AccountStuffItemField label="Author">{stuffItem.author}</AccountStuffItemField>
-
-					<AccountStuffItemField label="Author address">
-						{stuffItem.authorAddress}
-					</AccountStuffItemField>
-
-					<AccountStuffItemField label="Owner">{stuffItem.owner}</AccountStuffItemField>
-
-					<AccountStuffItemField label="Collection address">
-						{stuffItem.stuffCollectionAddress}
-					</AccountStuffItemField>
-
-					<AccountStuffItemField label="Creation date">
-						{Number.isNaN(creationDate.getTime())
-							? stuffItem.creationDate.toString()
-							: creationDate.toLocaleString()}
-					</AccountStuffItemField>
-
-					<AccountStuffItemField label="Internal id">
-						{stuffItem.tokenId.toString()}
-					</AccountStuffItemField>
-				</Box>
-
-				<AccountStuffItemField label="Description">
-					{stuffItem.description || "-"}
-				</AccountStuffItemField>
-
-				<AccountStuffItemField label="Options">
-					<Box className="grid gap-1">
-						{stuffItem.options.length > 0 ? (
-							stuffItem.options.map(([name, value]) => (
-								<Box key={name} className="flex gap-2 text-sm">
-									<Box className="capitalize text-muted-foreground">{name}:</Box>
-									<Box>{value}</Box>
-								</Box>
-							))
-						) : (
-							<Box>-</Box>
-						)}
-					</Box>
-				</AccountStuffItemField>
-			</Box>
-		</Box>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

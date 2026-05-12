@@ -36,7 +36,7 @@ const StuffWall = () => {
 
 	return (
 		<Box className="grid gap-4">
-			<Box className="grid grid-cols-2 gap-0 desktop:grid-cols-6">
+			<Box className="grid grid-cols-2 gap-0 desktop:grid-cols-7">
 				{stuffItems.map((stuffItem) => {
 					const pixels = decodeCanvasToPixels(stuffItem.canvas, stuffItem.collection.palette);
 
