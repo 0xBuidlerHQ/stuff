@@ -1,7 +1,8 @@
 import { Beaut } from "@0xhq/beaut";
 import { links } from "@/config/links";
 import type { StuffCollection, StuffItemCart } from "@/config/types";
-import { decodeCanvasToPixels, GridPreview } from "@/features/grid";
+import { GridPreview } from "@/features/grid/gridPreview";
+import { decodeCanvasToPixels } from "@/features/grid/utils";
 import { Box } from "@/primitives/box";
 import { ButtonPrimary } from "@/primitives/button";
 

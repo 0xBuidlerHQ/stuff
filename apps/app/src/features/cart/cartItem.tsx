@@ -5,7 +5,8 @@ import { Trash2 } from "lucide-react";
 import Image from "next/image";
 import type { PropsWithChildren } from "react";
 import type { StuffCollection, StuffItemCart } from "@/config/types";
-import { decodeCanvasToPixels, GridPreview } from "@/features/grid";
+import { GridPreview } from "@/features/grid/gridPreview";
+import { decodeCanvasToPixels } from "@/features/grid/utils";
 import { Box } from "@/primitives/box";
 import { Button } from "@/primitives/button";
 

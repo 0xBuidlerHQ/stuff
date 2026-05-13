@@ -10,9 +10,10 @@ import {
 } from "react";
 import type { StuffCollection, StuffItemCart } from "@/config/types";
 import { useCartStore } from "@/features/cart/store";
+import { Grid } from "@/features/grid/grid";
+import { getDefaultPixels } from "@/features/grid/utils";
 import { Box } from "@/primitives/box";
 import { ButtonPrimary } from "@/primitives/button";
-import { Grid, getDefaultPixels } from "../grid";
 
 type StuffItemConfiguration = {
 	stuffCollection: StuffCollection;
