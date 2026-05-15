@@ -1475,6 +1475,164 @@ export const iMulticall3Abi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// PantoneRegistry
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ *
+ */
+export const pantoneRegistryAbi = [
+  {
+    type: 'constructor',
+    inputs: [{ name: '_owner', internalType: 'address', type: 'address' }],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_pantone', internalType: 'string', type: 'string' },
+      { name: '_hexValue', internalType: 'string', type: 'string' },
+      { name: '_cmyk', internalType: 'string', type: 'string' },
+    ],
+    name: 'createPantone',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_pantone', internalType: 'string', type: 'string' }],
+    name: 'getPantone',
+    outputs: [
+      {
+        name: 'pantone',
+        internalType: 'struct PantoneRegistry.Pantone',
+        type: 'tuple',
+        components: [
+          { name: 'pantone', internalType: 'string', type: 'string' },
+          { name: 'hexValue', internalType: 'string', type: 'string' },
+          { name: 'cmyk', internalType: 'string', type: 'string' },
+          { name: 'exists', internalType: 'bool', type: 'bool' },
+        ],
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_pantone', internalType: 'string', type: 'string' }],
+    name: 'hasPantone',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_owner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_pantone', internalType: 'string', type: 'string' },
+      { name: '_hexValue', internalType: 'string', type: 'string' },
+      { name: '_cmyk', internalType: 'string', type: 'string' },
+    ],
+    name: 'updatePantone',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'owner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnerUpdated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'pantone',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'hexValue',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      { name: 'cmyk', internalType: 'string', type: 'string', indexed: false },
+    ],
+    name: 'PantoneCreated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'pantone',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'hexValue',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      { name: 'cmyk', internalType: 'string', type: 'string', indexed: false },
+    ],
+    name: 'PantoneUpdated',
+  },
+  { type: 'error', inputs: [], name: 'InvalidOwner' },
+  { type: 'error', inputs: [], name: 'InvalidPantone' },
+  {
+    type: 'error',
+    inputs: [{ name: 'pantone', internalType: 'string', type: 'string' }],
+    name: 'PantoneAlreadyExists',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'pantone', internalType: 'string', type: 'string' }],
+    name: 'PantoneNotFound',
+  },
+  { type: 'error', inputs: [], name: 'Unauthorized' },
+] as const
+
+/**
+ *
+ */
+export const pantoneRegistryAddress = {
+  31337: '0x9d6bCFfeA00a0659084490f666d8007efC430610',
+} as const
+
+/**
+ *
+ */
+export const pantoneRegistryConfig = {
+  address: pantoneRegistryAddress,
+  abi: pantoneRegistryAbi,
+} as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SafeCast
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1562,7 +1720,6 @@ export const stuffCollectionErc721Abi = [
           { name: 'sku', internalType: 'string', type: 'string' },
           { name: 'category', internalType: 'string', type: 'string' },
           { name: 'metadataURI', internalType: 'string', type: 'string' },
-          { name: 'palette', internalType: 'string[]', type: 'string[]' },
           { name: 'options', internalType: 'string[][]', type: 'string[][]' },
           {
             name: 'paymentToken',
@@ -1577,6 +1734,11 @@ export const stuffCollectionErc721Abi = [
           { name: 'maxSupply', internalType: 'uint256', type: 'uint256' },
           { name: 'mintPriceToken', internalType: 'uint256', type: 'uint256' },
         ],
+      },
+      {
+        name: '_pantoneRegistry',
+        internalType: 'contract PantoneRegistry',
+        type: 'address',
       },
       { name: '_owner', internalType: 'address', type: 'address' },
       { name: '_relayer', internalType: 'address', type: 'address' },
@@ -1638,6 +1800,19 @@ export const stuffCollectionErc721Abi = [
   {
     type: 'function',
     inputs: [],
+    name: 'getPantoneRegistry',
+    outputs: [
+      {
+        name: 'pantoneRegistry',
+        internalType: 'contract PantoneRegistry',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
     name: 'getStuffCollection',
     outputs: [
       {
@@ -1648,7 +1823,6 @@ export const stuffCollectionErc721Abi = [
           { name: 'sku', internalType: 'string', type: 'string' },
           { name: 'category', internalType: 'string', type: 'string' },
           { name: 'metadataURI', internalType: 'string', type: 'string' },
-          { name: 'palette', internalType: 'string[]', type: 'string[]' },
           { name: 'options', internalType: 'string[][]', type: 'string[][]' },
           {
             name: 'paymentToken',
@@ -1685,7 +1859,7 @@ export const stuffCollectionErc721Abi = [
           { name: 'title', internalType: 'string', type: 'string' },
           { name: 'description', internalType: 'string', type: 'string' },
           { name: 'creationDate', internalType: 'uint256', type: 'uint256' },
-          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'canvas', internalType: 'string[]', type: 'string[]' },
           { name: 'options', internalType: 'string[][]', type: 'string[][]' },
         ],
       },
@@ -1714,7 +1888,7 @@ export const stuffCollectionErc721Abi = [
           { name: 'author', internalType: 'string', type: 'string' },
           { name: 'title', internalType: 'string', type: 'string' },
           { name: 'description', internalType: 'string', type: 'string' },
-          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'canvas', internalType: 'string[]', type: 'string[]' },
           { name: 'options', internalType: 'string[][]', type: 'string[][]' },
         ],
       },
@@ -1735,7 +1909,7 @@ export const stuffCollectionErc721Abi = [
           { name: 'author', internalType: 'string', type: 'string' },
           { name: 'title', internalType: 'string', type: 'string' },
           { name: 'description', internalType: 'string', type: 'string' },
-          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'canvas', internalType: 'string[]', type: 'string[]' },
           { name: 'options', internalType: 'string[][]', type: 'string[][]' },
         ],
       },
@@ -1772,7 +1946,7 @@ export const stuffCollectionErc721Abi = [
           { name: 'author', internalType: 'string', type: 'string' },
           { name: 'title', internalType: 'string', type: 'string' },
           { name: 'description', internalType: 'string', type: 'string' },
-          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'canvas', internalType: 'string[]', type: 'string[]' },
           { name: 'options', internalType: 'string[][]', type: 'string[][]' },
         ],
       },
@@ -2048,7 +2222,7 @@ export const stuffCollectionErc721Abi = [
           { name: 'title', internalType: 'string', type: 'string' },
           { name: 'description', internalType: 'string', type: 'string' },
           { name: 'creationDate', internalType: 'uint256', type: 'uint256' },
-          { name: 'canvas', internalType: 'bytes', type: 'bytes' },
+          { name: 'canvas', internalType: 'string[]', type: 'string[]' },
           { name: 'options', internalType: 'string[][]', type: 'string[][]' },
         ],
         indexed: false,
@@ -2132,6 +2306,14 @@ export const stuffCollectionErc721Abi = [
     inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
     name: 'InvalidCanvasLength',
   },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'pixelIndex', internalType: 'uint256', type: 'uint256' },
+      { name: 'pantone', internalType: 'string', type: 'string' },
+    ],
+    name: 'InvalidCanvasPantone',
+  },
   { type: 'error', inputs: [], name: 'InvalidConfig' },
   {
     type: 'error',
@@ -2163,18 +2345,8 @@ export const stuffCollectionErc721Abi = [
     name: 'InvalidOptionsLength',
   },
   { type: 'error', inputs: [], name: 'InvalidOwner' },
-  {
-    type: 'error',
-    inputs: [{ name: 'length', internalType: 'uint256', type: 'uint256' }],
-    name: 'InvalidPaletteLength',
-  },
   { type: 'error', inputs: [], name: 'InvalidRelayer' },
   { type: 'error', inputs: [], name: 'MaxSupplyReached' },
-  {
-    type: 'error',
-    inputs: [{ name: 'colorIndex', internalType: 'uint8', type: 'uint8' }],
-    name: 'PaletteIndexOutOfRange',
-  },
   {
     type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
@@ -2189,6 +2361,26 @@ export const stuffCollectionErc721Abi = [
 
 export const stuffCollectionFactoryAbi = [
   {
+    type: 'constructor',
+    inputs: [
+      {
+        name: '_pantoneRegistry',
+        internalType: 'contract PantoneRegistry',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'PANTONE_REGISTRY',
+    outputs: [
+      { name: '', internalType: 'contract PantoneRegistry', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
     type: 'function',
     inputs: [
       {
@@ -2199,7 +2391,6 @@ export const stuffCollectionFactoryAbi = [
           { name: 'sku', internalType: 'string', type: 'string' },
           { name: 'category', internalType: 'string', type: 'string' },
           { name: 'metadataURI', internalType: 'string', type: 'string' },
-          { name: 'palette', internalType: 'string[]', type: 'string[]' },
           { name: 'options', internalType: 'string[][]', type: 'string[][]' },
           {
             name: 'paymentToken',
@@ -2272,7 +2463,6 @@ export const stuffCollectionFactoryAbi = [
           { name: 'sku', internalType: 'string', type: 'string' },
           { name: 'category', internalType: 'string', type: 'string' },
           { name: 'metadataURI', internalType: 'string', type: 'string' },
-          { name: 'palette', internalType: 'string[]', type: 'string[]' },
           { name: 'options', internalType: 'string[][]', type: 'string[][]' },
           {
             name: 'paymentToken',
@@ -2292,4 +2482,5 @@ export const stuffCollectionFactoryAbi = [
     ],
     name: 'StuffCollectionERC721Created',
   },
+  { type: 'error', inputs: [], name: 'InvalidPantoneRegistry' },
 ] as const

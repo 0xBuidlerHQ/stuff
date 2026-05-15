@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { PonderProvider } from "@/providers/ponder";
 import { QueryProvider } from "@/providers/query";
+import { StuffEcosystemProvider } from "@/providers/stuff-ecosystem";
 import { WagmiProvider, type WagmiProviderProps } from "@/providers/wagmi";
 import { Web3Provider } from "@/providers/web3";
 
@@ -19,7 +20,9 @@ const LogicProviders = ({ children, initialState }: PropsWithChildren & WagmiPro
 		<QueryProvider>
 			<WagmiProvider initialState={initialState}>
 				<PonderProvider>
-					<Web3Provider>{children}</Web3Provider>
+					<StuffEcosystemProvider>
+						<Web3Provider>{children}</Web3Provider>
+					</StuffEcosystemProvider>
 				</PonderProvider>
 			</WagmiProvider>
 		</QueryProvider>

@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {StdCheats} from "forge-std/StdCheats.sol";
 
+import {PantoneRegistry} from "@stuff/PantoneRegistry.sol";
 import {StuffCollectionERC721} from "@stuff/StuffCollectionERC721.sol";
 import {StuffCollectionFactory} from "@stuff/StuffCollectionFactory.sol";
 
@@ -11,6 +12,7 @@ import {Packages} from "./utils/Packages.s.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {VmSafe} from "forge-std/Vm.sol";
 
 contract Deploy is Actors, Packages, StdCheats {
     using SafeERC20 for IERC20;
@@ -35,6 +37,8 @@ contract Deploy is Actors, Packages, StdCheats {
     error InsufficientWhaleBalance(address whale, uint256 balance, uint256 required);
 
     function run() external {
+        addDevDeployment(block.number);
+
         Actor memory deployer = actor("DEPLOYER", 0);
         Actor memory alice = actor("alice", 1);
         Actor memory bob = actor("bob", 2);
@@ -59,13 +63,13 @@ contract Deploy is Actors, Packages, StdCheats {
         /**
          * @dev Pures.
          */
-        StuffCollectionFactory stuffCollectionFactory = new StuffCollectionFactory{salt: SALT}();
+        PantoneRegistry pantoneRegistry = new PantoneRegistry{salt: SALT}(deployer.addr);
+        StuffCollectionFactory stuffCollectionFactory = new StuffCollectionFactory{salt: SALT}(pantoneRegistry);
         StuffCollectionERC721 stuffCollectionERC721 = stuffCollectionFactory.createStuffCollectionERC721(
             StuffCollectionERC721.StuffCollection({
                 sku: "stuff-00000",
                 category: "garment",
                 metadataURI: "https://example.com/stuff-00000.json",
-                palette: _getPalette(),
                 options: _getOptions(),
                 //
                 paymentToken: usdc,
@@ -84,6 +88,7 @@ contract Deploy is Actors, Packages, StdCheats {
          */
         addDeployment("USDC", address(usdc));
 
+        addDeployment("PantoneRegistry", address(pantoneRegistry));
         addDeployment("StuffFactory", address(stuffCollectionFactory));
         addDeployment("StuffERC721", address(stuffCollectionERC721));
     }
@@ -136,27 +141,6 @@ contract Deploy is Actors, Packages, StdCheats {
         revert UnsupportedChain(block.chainid);
     }
 
-    function _getPalette() internal pure returns (string[] memory palette) {
-        palette = new string[](16);
-
-        palette[0] = "#2563eb";
-        palette[1] = "#facc15";
-        palette[2] = "#111111";
-        palette[3] = "#ffffff";
-        palette[4] = "#ef4444";
-        palette[5] = "#22c55e";
-        palette[6] = "#14b8a6";
-        palette[7] = "#38bdf8";
-        palette[8] = "#f97316";
-        palette[9] = "#8b5cf6";
-        palette[10] = "#ec4899";
-        palette[11] = "#a16207";
-        palette[12] = "#737373";
-        palette[13] = "#d4d4d4";
-        palette[14] = "#0f172a";
-        palette[15] = "#f8fafc";
-    }
-
     function _getOptions() internal pure returns (string[][] memory options) {
         options = new string[][](1);
 
@@ -168,5 +152,24 @@ contract Deploy is Actors, Packages, StdCheats {
         options[0][4] = "L";
         options[0][5] = "XL";
         options[0][6] = "XXL";
+    }
+
+    function _getEarliestDeploymentBlock() internal view returns (uint64) {
+        uint64 chainId = uint64(block.chainid);
+        uint64 startBlock = vm.getBroadcast("PantoneRegistry", chainId, VmSafe.BroadcastTxType.Create2).blockNumber;
+
+        VmSafe.BroadcastTxSummary memory stuffFactoryDeployment =
+            vm.getBroadcast("StuffFactory", chainId, VmSafe.BroadcastTxType.Create2);
+        if (stuffFactoryDeployment.blockNumber < startBlock) {
+            startBlock = stuffFactoryDeployment.blockNumber;
+        }
+
+        VmSafe.BroadcastTxSummary memory stuffFactoryCall =
+            vm.getBroadcast("StuffFactory", chainId, VmSafe.BroadcastTxType.Call);
+        if (stuffFactoryCall.blockNumber != 0 && stuffFactoryCall.blockNumber < startBlock) {
+            startBlock = stuffFactoryCall.blockNumber;
+        }
+
+        return startBlock;
     }
 }

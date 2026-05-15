@@ -36,18 +36,6 @@ const getDefaultPixels = (size: number, firstColor: string, secondColor: string)
 	return pixels;
 };
 
-const decodeCanvasToPixels = (canvas: string, palette: readonly string[]) => {
-	const hex = canvas.startsWith("0x") ? canvas.slice(2) : canvas;
-	const pixels: string[] = [];
-
-	for (let index = 0; index < hex.length; index += 2) {
-		const paletteIndex = Number.parseInt(hex.slice(index, index + 2), 16);
-		pixels.push(palette[paletteIndex] ?? EMPTY_COLOR);
-	}
-
-	return pixels;
-};
-
 const arePixelsEqual = (left: readonly string[], right: readonly string[]) => {
 	if (left.length !== right.length) {
 		return false;
@@ -56,4 +44,4 @@ const arePixelsEqual = (left: readonly string[], right: readonly string[]) => {
 	return left.every((color, index) => color === right[index]);
 };
 
-export { arePixelsEqual, CANVAS_SIZE, decodeCanvasToPixels, EMPTY_COLOR, getDefaultPixels };
+export { arePixelsEqual, CANVAS_SIZE, EMPTY_COLOR, getDefaultPixels };

@@ -6,6 +6,7 @@ import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {PantoneRegistry} from "@stuff/PantoneRegistry.sol";
 
 interface IERC3009 {
     function receiveWithAuthorization(
@@ -46,7 +47,6 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
         string sku;
         string category;
         string metadataURI;
-        string[] palette;
         string[][] options;
 
         IERC20 paymentToken;
@@ -63,7 +63,7 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
 
         string title;
         string description;
-        bytes canvas;
+        string[] canvas;
         string[][] options;
     }
 
@@ -91,7 +91,7 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
         string title;
         string description;
         uint256 creationDate;
-        bytes canvas;
+        string[] canvas;
         string[][] options;
     }
 
@@ -101,7 +101,6 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
     string private SKU;
     string private CATEGORY;
     string private METADATA_URI;
-    string[] private PALETTE;
     string[][] private OPTIONS;
 
     /**
@@ -111,6 +110,7 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
     address immutable PAYMENT_RECIPIENT;
     uint256 immutable MAX_SUPPLY;
     uint256 immutable MINT_PRICE_TOKEN;
+    PantoneRegistry immutable PANTONE_REGISTRY;
 
     /**
      * @dev Variables.
@@ -139,10 +139,9 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
     error InvalidOwner();
     error InvalidRelayer();
     error Unauthorized();
-    error InvalidPaletteLength(uint256 length);
     error MaxSupplyReached();
     error InvalidCanvasLength(uint256 length);
-    error PaletteIndexOutOfRange(uint8 colorIndex);
+    error InvalidCanvasPantone(uint256 pixelIndex, string pantone);
     error InvalidOptionsLength(uint256 length);
     error InvalidOptionLength(uint256 optionIndex, uint256 length);
     error InvalidOptionName(uint256 optionIndex, string name);
@@ -161,7 +160,13 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
         _;
     }
 
-    constructor(uint256 _stuffId, StuffCollection memory _stuffCollection, address _owner, address _relayer)
+    constructor(
+        uint256 _stuffId,
+        StuffCollection memory _stuffCollection,
+        PantoneRegistry _pantoneRegistry,
+        address _owner,
+        address _relayer
+    )
         ERC721(
             string(abi.encodePacked("stuff#", Strings.toString(_stuffId))),
             string(abi.encodePacked("STUFF#", Strings.toString(_stuffId)))
@@ -172,13 +177,9 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
                 || bytes(_stuffCollection.metadataURI).length == 0
                 || address(_stuffCollection.paymentToken) == address(0)
                 || _stuffCollection.paymentRecipient == address(0) || _stuffCollection.maxSupply <= 0
-                || _stuffCollection.mintPriceToken <= 0
+                || _stuffCollection.mintPriceToken <= 0 || address(_pantoneRegistry) == address(0)
         ) {
             revert InvalidConfig();
-        }
-
-        if (_stuffCollection.palette.length == 0 || _stuffCollection.palette.length > uint256(type(uint8).max) + 1) {
-            revert InvalidPaletteLength(_stuffCollection.palette.length);
         }
 
         if (_owner == address(0)) revert InvalidOwner();
@@ -191,13 +192,13 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
         SKU = _stuffCollection.sku;
         CATEGORY = _stuffCollection.category;
         METADATA_URI = _stuffCollection.metadataURI;
-        PALETTE = _stuffCollection.palette;
         OPTIONS = _stuffCollection.options;
 
         PAYMENT_TOKEN = _stuffCollection.paymentToken;
         PAYMENT_RECIPIENT = _stuffCollection.paymentRecipient;
         MAX_SUPPLY = _stuffCollection.maxSupply;
         MINT_PRICE_TOKEN = _stuffCollection.mintPriceToken;
+        PANTONE_REGISTRY = _pantoneRegistry;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -277,7 +278,6 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
         stuffCollection = StuffCollection({
             sku: SKU,
             metadataURI: METADATA_URI,
-            palette: PALETTE,
             options: OPTIONS,
             category: CATEGORY,
             paymentToken: PAYMENT_TOKEN,
@@ -285,6 +285,13 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
             maxSupply: MAX_SUPPLY,
             mintPriceToken: MINT_PRICE_TOKEN
         });
+    }
+
+    /**
+     * @dev getPantoneRegistry.
+     */
+    function getPantoneRegistry() external view returns (PantoneRegistry pantoneRegistry) {
+        pantoneRegistry = PANTONE_REGISTRY;
     }
 
     /**
@@ -330,12 +337,13 @@ contract StuffCollectionERC721 is ERC721, ERC721Enumerable {
     /**
      * @dev _validateCanvas.
      */
-    function _validateCanvas(bytes calldata _canvas) internal view returns (bytes memory canvas) {
+    function _validateCanvas(string[] calldata _canvas) internal view returns (string[] memory canvas) {
         if (_canvas.length != CANVAS_SIZE) revert InvalidCanvasLength(_canvas.length);
 
         for (uint256 i = 0; i < CANVAS_SIZE; i++) {
-            uint8 colorIndex = uint8(_canvas[i]);
-            if (colorIndex >= PALETTE.length) revert PaletteIndexOutOfRange(colorIndex);
+            if (!PANTONE_REGISTRY.hasPantone(_canvas[i])) {
+                revert InvalidCanvasPantone(i, _canvas[i]);
+            }
         }
 
         canvas = _canvas;

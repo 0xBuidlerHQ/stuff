@@ -35,7 +35,6 @@ const useStuffCollections = () => {
 
 	return {
 		q: query,
-
 		stuffCollections,
 		stuffCollectionsByAddress,
 	};

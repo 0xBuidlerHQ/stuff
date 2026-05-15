@@ -6,8 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { StuffItem } from "@/config/types";
 import { GridPreview } from "@/features/grid/gridPreview";
-import { decodeCanvasToPixels } from "@/features/grid/utils";
 import { Box } from "@/primitives/box";
+import { useStuffEcosystem } from "@/providers/stuff-ecosystem";
 
 type AccountStuffItemProps = {
 	stuffItem: StuffItem;
@@ -16,7 +16,8 @@ type AccountStuffItemProps = {
 const AccountStuffItem = (props: AccountStuffItemProps) => {
 	const stuffItem = props.stuffItem;
 	const collection = stuffItem.collection;
-	const pixels = decodeCanvasToPixels(stuffItem.canvas, collection.palette);
+	const { decodeCanvasToPixels } = useStuffEcosystem();
+	const pixels = decodeCanvasToPixels(stuffItem.canvas);
 	const displayTitle = stuffItem.title || `#${stuffItem.tokenId}`;
 	const displayPrice = Beaut.money(Number(Beaut.bigint(collection.mintPriceToken, 6)));
 	const href = `/stuffs/${collection.slug}/${stuffItem.tokenId.toString()}`;

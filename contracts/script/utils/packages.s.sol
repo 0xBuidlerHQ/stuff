@@ -23,6 +23,16 @@ abstract contract Packages is Script {
         vm.writeJson(valueJson, DEPLOYMENTS_PATH, jsonPath);
     }
 
+    function addDevDeployment(uint256 startBlock) internal {
+        _ensureDeploymentsFile();
+
+        string memory chainKey = vm.toString(block.chainid);
+        string memory jsonPath = string.concat(".dev.", chainKey);
+        string memory valueJson = string.concat('{"startBlock":', vm.toString(startBlock), "}");
+
+        vm.writeJson(valueJson, DEPLOYMENTS_PATH, jsonPath);
+    }
+
     function _ensureDeploymentsFile() internal {
         if (!vm.exists(DEPLOYMENTS_PATH)) {
             vm.writeFile(DEPLOYMENTS_PATH, "{}");

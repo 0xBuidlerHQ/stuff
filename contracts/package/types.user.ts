@@ -2,6 +2,15 @@
 export type Address = string;
 export type Bytes = string;
 
+export namespace PantoneRegistry {
+	export type Pantone = {
+		pantone: string;
+		hexValue: string;
+		cmyk: string;
+		exists: boolean;
+	};
+}
+
 export namespace StuffCollectionERC721 {
 	export type MintAuthorization = {
 		from: Address;
@@ -16,7 +25,6 @@ export namespace StuffCollectionERC721 {
 		sku: string;
 		category: string;
 		metadataURI: string;
-		palette: Array<string>;
 		options: Array<Array<string>>;
 		paymentToken: Address;
 		paymentRecipient: Address;
@@ -30,14 +38,14 @@ export namespace StuffCollectionERC721 {
 		title: string;
 		description: string;
 		creationDate: bigint;
-		canvas: Bytes;
+		canvas: Array<string>;
 		options: Array<Array<string>>;
 	};
 	export type StuffItemMintParams = {
 		author: string;
 		title: string;
 		description: string;
-		canvas: Bytes;
+		canvas: Array<string>;
 		options: Array<Array<string>>;
 	};
 }

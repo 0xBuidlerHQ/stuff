@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
+import {PantoneRegistry} from "@stuff/PantoneRegistry.sol";
 import {StuffCollectionERC721} from "@stuff/StuffCollectionERC721.sol";
 
 /**
@@ -11,6 +12,7 @@ contract StuffCollectionFactory {
      * @dev Variables.
      */
     uint256 public stuffIdsIndex = 0;
+    PantoneRegistry public immutable PANTONE_REGISTRY;
 
     /**
      * @dev Mappings.
@@ -27,6 +29,14 @@ contract StuffCollectionFactory {
         StuffCollectionERC721.StuffCollection stuffCollection
     );
 
+    error InvalidPantoneRegistry();
+
+    constructor(PantoneRegistry _pantoneRegistry) {
+        if (address(_pantoneRegistry) == address(0)) revert InvalidPantoneRegistry();
+
+        PANTONE_REGISTRY = _pantoneRegistry;
+    }
+
     /**
      * @dev
      */
@@ -38,7 +48,11 @@ contract StuffCollectionFactory {
         uint256 stuffId = stuffIdsIndex++;
 
         newStuffCollection = new StuffCollectionERC721({
-            _stuffId: stuffId, _stuffCollection: _stuffCollection, _owner: _owner, _relayer: _relayer
+            _stuffId: stuffId,
+            _stuffCollection: _stuffCollection,
+            _pantoneRegistry: PANTONE_REGISTRY,
+            _owner: _owner,
+            _relayer: _relayer
         });
 
         stuffCollection[stuffId] = newStuffCollection;

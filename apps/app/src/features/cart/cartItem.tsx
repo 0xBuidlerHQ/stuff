@@ -6,9 +6,9 @@ import Image from "next/image";
 import type { PropsWithChildren } from "react";
 import type { StuffCollection, StuffItemCart } from "@/config/types";
 import { GridPreview } from "@/features/grid/gridPreview";
-import { decodeCanvasToPixels } from "@/features/grid/utils";
 import { Box } from "@/primitives/box";
 import { Button } from "@/primitives/button";
+import { useStuffEcosystem } from "@/providers/stuff-ecosystem";
 
 type CartItemElementProps = {
 	label: string;
@@ -41,8 +41,9 @@ type CartItemProps = {
 const CartItem = (props: CartItemProps) => {
 	const cartItem = props.cartItem;
 	const stuffCollection = props.stuffCollection;
+	const { decodeCanvasToPixels } = useStuffEcosystem();
 
-	const pixels = decodeCanvasToPixels(cartItem.canvas, stuffCollection.palette);
+	const pixels = decodeCanvasToPixels(cartItem.canvas);
 
 	return (
 		<Box className="grid border border-border bg-background desktop:grid-cols-12">

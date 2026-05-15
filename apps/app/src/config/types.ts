@@ -36,6 +36,33 @@ type StuffAssets = {
 	images: StaticImageData[];
 	description: string;
 	information: string[][];
+	productSpecs: {
+		material: string[];
+		provenance: string[];
+		priceBreakdown: Array<{ label: string; value: string }>;
+	};
 };
 
-export type { StuffCollection, StuffItem, StuffItemCart, StuffItemMintParams };
+/**
+ * @dev
+ */
+type PantoneColor = SubgraphTypes.Pantone;
+
+/**
+ * @dev
+ */
+type MainColors = {
+	black: PantoneColor;
+	white: PantoneColor;
+	yellow: PantoneColor;
+	blue: PantoneColor;
+};
+
+export type {
+	MainColors,
+	PantoneColor,
+	StuffCollection,
+	StuffItem,
+	StuffItemCart,
+	StuffItemMintParams,
+};

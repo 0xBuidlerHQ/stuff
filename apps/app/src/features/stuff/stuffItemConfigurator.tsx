@@ -8,12 +8,14 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import type { StuffCollection, StuffItemCart } from "@/config/types";
+import type { MainColors, StuffCollection, StuffItemCart } from "@/config/types";
 import { useCartStore } from "@/features/cart/store";
 import { Grid } from "@/features/grid/grid";
+import { gridTemplateLibrary } from "@/features/grid/templates";
 import { getDefaultPixels } from "@/features/grid/utils";
 import { Box } from "@/primitives/box";
 import { ButtonPrimary } from "@/primitives/button";
+import { useStuffEcosystem } from "@/providers/stuff-ecosystem";
 
 type StuffItemConfiguration = {
 	stuffCollection: StuffCollection;
@@ -39,18 +41,13 @@ type StuffItemConfiguratorContextValue = {
 };
 
 const GRID_SIZE = 42;
-const MAX_PALETTE_COLORS = 256;
-
 const StuffItemConfiguratorContext = createContext<StuffItemConfiguratorContextValue | null>(null);
 
-const getPalette = (stuffCollection: StuffCollection) => {
-	if (!Array.isArray(stuffCollection.palette)) {
-		return [];
-	}
+const getDefaultDisplayColors = (displayPalette: string[], mainColors?: MainColors) => {
+	const firstColor = mainColors?.black.hexValue ?? displayPalette[0] ?? "transparent";
+	const secondColor = mainColors?.white.hexValue ?? displayPalette[1] ?? firstColor;
 
-	return stuffCollection.palette
-		.slice(0, MAX_PALETTE_COLORS)
-		.filter((color): color is string => typeof color === "string");
+	return { firstColor, secondColor };
 };
 
 const getOptions = (stuffCollection: StuffCollection) => {
@@ -63,20 +60,23 @@ const getOptions = (stuffCollection: StuffCollection) => {
 		.map((option) => option.filter((value): value is string => typeof value === "string"));
 };
 
-const getCanvas = (configuration: StuffItemConfiguration): StuffItemCart["canvas"] => {
-	const palette = getPalette(configuration.stuffCollection);
-	const paletteIndexByColor = new Map(palette.map((color, index) => [color, index] as const));
-	const paletteIndexes = configuration.design.pixels.map((color) => {
-		const paletteIndex = paletteIndexByColor.get(color);
+const getCanvas = (
+	configuration: StuffItemConfiguration,
+	displayPalette: string[],
+	pantonePalette: string[],
+): StuffItemCart["canvas"] => {
+	const pantoneByDisplayColor = new Map(
+		displayPalette.map((color, index) => [color, pantonePalette[index]] as const),
+	);
+	return configuration.design.pixels.map((color) => {
+		const pantone = pantoneByDisplayColor.get(color);
 
-		if (paletteIndex === undefined) {
-			throw new Error(`Unknown palette color: ${color}`);
+		if (!pantone) {
+			throw new Error(`Unknown Pantone color: ${color}`);
 		}
 
-		return paletteIndex;
+		return pantone;
 	});
-
-	return `0x${paletteIndexes.map((index) => index.toString(16).padStart(2, "0")).join("")}`;
 };
 
 const getSelectedOptions = (configuration: StuffItemConfiguration): StuffItemCart["options"] => {
@@ -91,10 +91,14 @@ const getSelectedOptions = (configuration: StuffItemConfiguration): StuffItemCar
 	});
 };
 
-const getCartItem = (configuration: StuffItemConfiguration): StuffItemCart => {
+const getCartItem = (
+	configuration: StuffItemConfiguration,
+	displayPalette: string[],
+	pantonePalette: string[],
+): StuffItemCart => {
 	return {
 		author: configuration.author,
-		canvas: getCanvas(configuration),
+		canvas: getCanvas(configuration, displayPalette, pantonePalette),
 		description: configuration.description,
 		options: getSelectedOptions(configuration),
 		stuffCollectionAddress: configuration.stuffCollection.address,
@@ -102,18 +106,18 @@ const getCartItem = (configuration: StuffItemConfiguration): StuffItemCart => {
 	};
 };
 
-const createDefaultConfiguration = (stuffCollection: StuffCollection): StuffItemConfiguration => {
-	const palette = getPalette(stuffCollection);
+const createDefaultConfiguration = (
+	stuffCollection: StuffCollection,
+	displayPalette: string[],
+	mainColors?: MainColors,
+): StuffItemConfiguration => {
+	const { firstColor, secondColor } = getDefaultDisplayColors(displayPalette, mainColors);
 
 	return {
 		author: "",
 		description: "",
 		design: {
-			pixels: getDefaultPixels(
-				GRID_SIZE,
-				palette[0] ?? "transparent",
-				palette[1] ?? palette[0] ?? "transparent",
-			),
+			pixels: getDefaultPixels(GRID_SIZE, firstColor, secondColor),
 			size: GRID_SIZE,
 		},
 		selectedOptions: {},
@@ -127,20 +131,37 @@ const StuffItemConfiguratorProvider = ({
 	stuffCollection,
 }: PropsWithChildren<{ stuffCollection: StuffCollection }>) => {
 	const addItem = useCartStore((state) => state.addItem);
+	const { getPantoneDisplayColor, pantoneColors, mainColors } = useStuffEcosystem();
+	const pantonePalette = useMemo(
+		() => pantoneColors.map((pantoneColor) => pantoneColor.pantone),
+		[pantoneColors],
+	);
+	const displayPalette = useMemo(
+		() => pantonePalette.map(getPantoneDisplayColor),
+		[getPantoneDisplayColor, pantonePalette],
+	);
 
 	const [configuration, setConfiguration] = useState<StuffItemConfiguration>(() =>
-		createDefaultConfiguration(stuffCollection),
+		createDefaultConfiguration(stuffCollection, displayPalette, mainColors),
 	);
 
 	useEffect(() => {
 		setConfiguration((currentConfiguration) => {
 			if (currentConfiguration.stuffCollection.id === stuffCollection.id) {
+				const hasOnlyPlaceholderPixels = currentConfiguration.design.pixels.every(
+					(pixel) => pixel === "transparent",
+				);
+
+				if (displayPalette.length > 0 && hasOnlyPlaceholderPixels) {
+					return createDefaultConfiguration(stuffCollection, displayPalette, mainColors);
+				}
+
 				return currentConfiguration;
 			}
 
-			return createDefaultConfiguration(stuffCollection);
+			return createDefaultConfiguration(stuffCollection, displayPalette, mainColors);
 		});
-	}, [stuffCollection]);
+	}, [displayPalette, mainColors, stuffCollection]);
 
 	const requiredOptionNames = useMemo(
 		() =>
@@ -167,15 +188,23 @@ const StuffItemConfiguratorProvider = ({
 			},
 			addToCart: () => {
 				if (!isConfigurationComplete) return;
-				setConfiguration(createDefaultConfiguration(stuffCollection));
-				addItem(getCartItem(configuration));
+				setConfiguration(createDefaultConfiguration(stuffCollection, displayPalette, mainColors));
+				addItem(getCartItem(configuration, displayPalette, pantonePalette));
 
 				requestAnimationFrame(() => {
 					window.scrollTo({ top: 0, behavior: "smooth" });
 				});
 			},
 		}),
-		[addItem, configuration, isConfigurationComplete, stuffCollection],
+		[
+			addItem,
+			configuration,
+			displayPalette,
+			isConfigurationComplete,
+			mainColors,
+			pantonePalette,
+			stuffCollection,
+		],
 	);
 
 	return (
@@ -198,8 +227,22 @@ const useStuffItemConfigurator = () => {
 const StuffItemConfiguratorContent = () => {
 	const { configuration, isConfigurationComplete, updateConfiguration, addToCart } =
 		useStuffItemConfigurator();
+	const { getPantoneDisplayColor, pantoneColors, mainColors } = useStuffEcosystem();
 	const options = getOptions(configuration.stuffCollection);
-	const palette = getPalette(configuration.stuffCollection);
+	const displayPalette = useMemo(
+		() => pantoneColors.map((pantoneColor) => getPantoneDisplayColor(pantoneColor.pantone)),
+		[getPantoneDisplayColor, pantoneColors],
+	);
+	const templates = useMemo(
+		() =>
+			gridTemplateLibrary.map((template) => ({
+				id: template.id,
+				name: template.name,
+				description: template.description,
+				pixels: template.canvas.flat().map((pantone) => getPantoneDisplayColor(pantone)),
+			})),
+		[getPantoneDisplayColor],
+	);
 
 	return (
 		<Box className="grid gap-6">
@@ -208,15 +251,15 @@ const StuffItemConfiguratorContent = () => {
 					<div className="flex flex-col gap-1">
 						<div className="text-xs font-unbounded">Canvas</div>
 
-						<div className="text-xs text-muted-foreground">
-							/ Use the palette and brush controls below.
-						</div>
+						<div className="text-xs text-muted-foreground">{"///"} Customize your design.</div>
 					</div>
 				</div>
 
 				<Grid
-					palettes={palette}
+					mainColors={mainColors}
+					palettes={displayPalette}
 					pixels={configuration.design.pixels}
+					templates={templates}
 					onPixelsChange={(pixels) =>
 						updateConfiguration({ design: { ...configuration.design, pixels } })
 					}
@@ -227,8 +270,9 @@ const StuffItemConfiguratorContent = () => {
 				<div className="grid gap-2">
 					<div className="flex flex-col gap-1">
 						<div className="text-xs font-unbounded">Author</div>
-						<div className="text-xs text-muted-foreground">/ Tell me who you are.</div>
+						<div className="text-xs text-muted-foreground">{"///"} Sign your piece.</div>
 					</div>
+
 					<input
 						value={configuration.author}
 						onChange={(event) => updateConfiguration({ author: event.target.value })}
@@ -240,7 +284,7 @@ const StuffItemConfiguratorContent = () => {
 				<div className="grid gap-2">
 					<div className="flex flex-col gap-1">
 						<div className="text-xs font-unbounded">Title</div>
-						<div className="text-xs text-muted-foreground">/ Title your piece.</div>
+						<div className="text-xs text-muted-foreground">{"///"} Title your piece.</div>
 					</div>
 					<input
 						value={configuration.title}
@@ -253,7 +297,7 @@ const StuffItemConfiguratorContent = () => {
 				<div className="grid gap-2">
 					<div className="flex flex-col gap-1">
 						<div className="text-xs font-unbounded">Description</div>
-						<div className="text-xs text-muted-foreground">/ Describe your piece.</div>
+						<div className="text-xs text-muted-foreground">{"///"} Describe your piece.</div>
 					</div>
 					<textarea
 						value={configuration.description}
@@ -264,10 +308,10 @@ const StuffItemConfiguratorContent = () => {
 				</div>
 			</Box>
 
-			<Box className="grid gap-8 border border-border bg-background p-4">
+			<Box className="grid gap-4 border border-border bg-background p-4">
 				<div className="flex flex-col gap-1">
 					<div className="text-xs font-unbounded">Options</div>
-					<div className="text-xs text-muted-foreground">/ Choose your options.</div>
+					<div className="text-xs text-muted-foreground">{"///"} Choose your options.</div>
 				</div>
 
 				<div className="grid gap-4">
@@ -277,9 +321,7 @@ const StuffItemConfiguratorContent = () => {
 
 						return (
 							<div key={name} className="grid gap-2">
-								<div className="capitalize text-xs font-unbounded text-muted-foreground">
-									{`///// ${name} /////`}
-								</div>
+								<div className="capitalize text-xs text-muted-foreground">{`${name}`}</div>
 								<div className="flex flex-wrap gap-2">
 									{values.map((value: string) => {
 										const isSelected = selectedValue === value;

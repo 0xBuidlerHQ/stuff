@@ -26,7 +26,7 @@ const mintWithAuthorizationAbi = [
 					{ name: "author", type: "string" },
 					{ name: "title", type: "string" },
 					{ name: "description", type: "string" },
-					{ name: "canvas", type: "bytes" },
+					{ name: "canvas", type: "string[]" },
 					{ name: "options", type: "string[][]" },
 				],
 			},
@@ -59,7 +59,7 @@ type MintParams = {
 	author: string;
 	title: string;
 	description: string;
-	canvas: Hex;
+	canvas: string[];
 	options: string[][];
 };
 

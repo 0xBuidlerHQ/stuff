@@ -2,9 +2,9 @@ import { Beaut } from "@0xhq/beaut";
 import { links } from "@/config/links";
 import type { StuffCollection, StuffItemCart } from "@/config/types";
 import { GridPreview } from "@/features/grid/gridPreview";
-import { decodeCanvasToPixels } from "@/features/grid/utils";
 import { Box } from "@/primitives/box";
 import { ButtonPrimary } from "@/primitives/button";
+import { useStuffEcosystem } from "@/providers/stuff-ecosystem";
 
 type OrderSummaryProps = {
 	items: StuffItemCart[];
@@ -15,6 +15,7 @@ type OrderSummaryProps = {
 const formatMoney = (amount: bigint) => Beaut.money(Number(Beaut.bigint(amount, 6)));
 
 const CartWidget = (props: OrderSummaryProps) => {
+	const { decodeCanvasToPixels } = useStuffEcosystem();
 	const summaryItems = props.items
 		.map((item) => {
 			const stuffCollection = props.stuffCollectionsByAddress.get(
@@ -49,7 +50,7 @@ const CartWidget = (props: OrderSummaryProps) => {
 						<Box className="text-sm text-muted-foreground">Your cart is empty.</Box>
 					) : (
 						summaryItems.map(({ id, item, stuffCollection }) => {
-							const pixels = decodeCanvasToPixels(item.canvas, stuffCollection.palette);
+							const pixels = decodeCanvasToPixels(item.canvas);
 
 							return (
 								<Box key={id} className="grid gap-1 border-b border-border pb-3 last:border-b-0">

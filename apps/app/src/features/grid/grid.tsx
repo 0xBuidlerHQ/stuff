@@ -4,17 +4,25 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getBrushPixelIndexes } from "@/features/grid/brush";
 import { BrushSizeControl } from "@/features/grid/brushSizeControl";
 import { GridHistoryControls } from "@/features/grid/gridHistoryControls";
+import { GridTemplatePicker } from "@/features/grid/gridTemplatePicker";
 import { PalettePicker } from "@/features/grid/palettePicker";
 import { PixelCanvas } from "@/features/grid/pixelCanvas";
 import type { GridProps } from "@/features/grid/types";
 import { arePixelsEqual, CANVAS_SIZE, EMPTY_COLOR, getDefaultPixels } from "@/features/grid/utils";
 import { Box } from "@/primitives/box";
 
-const Grid = ({ size = CANVAS_SIZE, palettes, pixels, onPixelsChange }: GridProps) => {
+const Grid = ({
+	size = CANVAS_SIZE,
+	palettes,
+	mainColors,
+	pixels,
+	onPixelsChange,
+	templates = [],
+}: GridProps) => {
 	const maxBrushSize = Math.max(1, Math.min(size, 8));
 	const [selectedColor, setSelectedColor] = useState<string>(palettes[0] ?? EMPTY_COLOR);
-	const firstColor = palettes[0] ?? EMPTY_COLOR;
-	const secondColor = palettes[1] ?? firstColor;
+	const firstColor = mainColors?.black.hexValue ?? EMPTY_COLOR;
+	const secondColor = mainColors?.white.hexValue ?? firstColor;
 	const defaultPixels = useMemo(
 		() => getDefaultPixels(size, firstColor, secondColor),
 		[size, firstColor, secondColor],
@@ -37,6 +45,18 @@ const Grid = ({ size = CANVAS_SIZE, palettes, pixels, onPixelsChange }: GridProp
 			setSelectedColor(palettes[0] ?? EMPTY_COLOR);
 		}
 	}, [palettes, selectedColor]);
+
+	const colorUsage = useMemo(() => {
+		const usage = Object.fromEntries(palettes.map((color) => [color, 0])) as Record<string, number>;
+
+		for (const pixel of pixels) {
+			if (pixel in usage) {
+				usage[pixel] += 1;
+			}
+		}
+
+		return usage;
+	}, [palettes, pixels]);
 
 	const canPaint = useMemo(() => size > 0 && palettes.length > 0, [palettes.length, size]);
 
@@ -136,9 +156,59 @@ const Grid = ({ size = CANVAS_SIZE, palettes, pixels, onPixelsChange }: GridProp
 		onPixelsChange(nextPixels);
 	};
 
+	const replaceColor = useCallback(
+		(fromColor: string, toColor: string) => {
+			if (!canPaint || fromColor === toColor) {
+				return;
+			}
+
+			let didChange = false;
+			const nextPixels = pixels.map((pixel) => {
+				if (pixel !== fromColor) {
+					return pixel;
+				}
+
+				didChange = true;
+				return toColor;
+			});
+
+			if (!didChange) {
+				return;
+			}
+
+			setHistory((currentHistory) => [...currentHistory, [...pixels]]);
+			setRedoHistory([]);
+
+			if (selectedColor === fromColor) {
+				setSelectedColor(toColor);
+			}
+
+			onPixelsChange(nextPixels);
+		},
+		[canPaint, onPixelsChange, pixels, selectedColor],
+	);
+
+	const applyTemplate = useCallback(
+		(template: NonNullable<GridProps["templates"]>[number]) => {
+			if (!canPaint || arePixelsEqual(pixels, template.pixels)) {
+				return;
+			}
+
+			setHistory((currentHistory) => [...currentHistory, [...pixels]]);
+			setRedoHistory([]);
+			onPixelsChange([...template.pixels]);
+		},
+		[canPaint, onPixelsChange, pixels],
+	);
+
+	const activeTemplateId = useMemo(
+		() => templates.find((template) => arePixelsEqual(template.pixels, pixels))?.id,
+		[pixels, templates],
+	);
+
 	return (
 		<div className="h-full overflow-hidden">
-			<div className="flex items-center justify-center p-4">
+			<div className="flex items-center justify-center">
 				<PixelCanvas
 					size={size}
 					brushSize={brushSize}
@@ -149,7 +219,15 @@ const Grid = ({ size = CANVAS_SIZE, palettes, pixels, onPixelsChange }: GridProp
 			</div>
 
 			<div className="pt-4 flex flex-col gap-2">
-				<Box className="flex items-center justify-center gap-10">
+				{templates.length > 0 ? (
+					<GridTemplatePicker
+						templates={templates}
+						activeTemplateId={activeTemplateId}
+						onApplyTemplate={applyTemplate}
+					/>
+				) : null}
+
+				<Box className="flex flex-wrap items-center gap-2">
 					<BrushSizeControl
 						brushSize={brushSize}
 						maxBrushSize={maxBrushSize}
@@ -167,13 +245,13 @@ const Grid = ({ size = CANVAS_SIZE, palettes, pixels, onPixelsChange }: GridProp
 					/>
 				</Box>
 
-				<Box className="flex justify-center">
-					<PalettePicker
-						palettes={palettes}
-						selectedColor={selectedColor}
-						onSelectColor={setSelectedColor}
-					/>
-				</Box>
+				<PalettePicker
+					palettes={palettes}
+					colorUsage={colorUsage}
+					selectedColor={selectedColor}
+					onSelectColor={setSelectedColor}
+					onReplaceColor={replaceColor}
+				/>
 			</div>
 		</div>
 	);

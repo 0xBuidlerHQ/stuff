@@ -4,10 +4,30 @@ import { eq } from "ponder";
 import type { Address } from "viem";
 
 /**
+ * @dev PantoneRegistry:PantoneCreated.
+ */
+ponder.on("PantoneRegistry:PantoneCreated", async ({ event, context }) => {
+	await context.db.insert(schema.pantone).values({
+		pantone: event.args.pantone,
+		hexValue: event.args.hexValue,
+		cmyk: event.args.cmyk,
+	});
+});
+
+/**
+ * @dev PantoneRegistry:PantoneUpdated.
+ */
+ponder.on("PantoneRegistry:PantoneUpdated", async ({ event, context }) => {
+	await context.db.update(schema.pantone, { pantone: event.args.pantone }).set({
+		hexValue: event.args.hexValue,
+		cmyk: event.args.cmyk,
+	});
+});
+
+/**
  * @dev StuffCollectionFactory:StuffCollectionERC721Created.
  */
 ponder.on("StuffCollectionFactory:StuffCollectionERC721Created", async ({ event, context }) => {
-	const palette = [...event.args.stuffCollection.palette];
 	const options = event.args.stuffCollection.options.map((item) => [...item]);
 
 	await context.db.insert(schema.stuffCollection).values({
@@ -16,7 +36,6 @@ ponder.on("StuffCollectionFactory:StuffCollectionERC721Created", async ({ event,
 		sku: event.args.stuffCollection.sku,
 		category: event.args.stuffCollection.category,
 		metadataURI: event.args.stuffCollection.metadataURI,
-		palette,
 		options,
 		paymentToken: event.args.stuffCollection.paymentToken,
 		paymentRecipient: event.args.stuffCollection.paymentRecipient,
@@ -33,6 +52,7 @@ ponder.on("StuffCollectionERC721:StuffItemCreated", async ({ event, context }) =
 	const { stuffItem } = event.args;
 
 	const options = stuffItem.options.map((option) => [...option]);
+	const canvas = [...stuffItem.canvas];
 
 	await context.db.insert(schema.stuffItem).values({
 		author: stuffItem.author,
@@ -40,7 +60,7 @@ ponder.on("StuffCollectionERC721:StuffItemCreated", async ({ event, context }) =
 		title: stuffItem.title,
 		description: stuffItem.description,
 		creationDate: stuffItem.creationDate,
-		canvas: stuffItem.canvas,
+		canvas,
 		options: options,
 		//
 		stuffCollectionAddress: event.log.address,

@@ -3,8 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { PropsWithChildren } from "react";
-import { GridPreview } from "@/features/grid/gridPreview";
-import { decodeCanvasToPixels } from "@/features/grid/utils";
+import { StuffItemCanvasPreview } from "@/features/stuff/stuffItemCanvasPreview";
 import { Box } from "@/primitives/box";
 import { Container } from "@/primitives/container";
 import { getStuffItemBySlugAndId } from "@/queries/getStuffItemBySlugAndId";
@@ -31,7 +30,6 @@ const Page = async ({ params }: { params: Promise<{ slug: string; itemId: string
 	if (!stuffItem) notFound();
 
 	const collection = stuffItem.collection;
-	const pixels = decodeCanvasToPixels(stuffItem.canvas, collection.palette);
 	const creationDate = new Date(Number(stuffItem.creationDate) * 1000);
 	const displayCreationDate = Number.isNaN(creationDate.getTime())
 		? stuffItem.creationDate.toString()
@@ -59,7 +57,7 @@ const Page = async ({ params }: { params: Promise<{ slug: string; itemId: string
 				<Box className="grid gap-6 desktop:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] desktop:items-start">
 					<Box className="grid grid-cols-2 gap-2">
 						<Box className="relative aspect-square overflow-hidden bg-muted">
-							<GridPreview pixels={pixels} />
+							<StuffItemCanvasPreview canvas={stuffItem.canvas} />
 						</Box>
 
 						<Box className="relative aspect-square overflow-hidden bg-muted">

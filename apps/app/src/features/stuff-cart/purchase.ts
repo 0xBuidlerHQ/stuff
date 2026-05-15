@@ -57,7 +57,7 @@ type MintRelayRequest = {
 		author: string;
 		title: string;
 		description: string;
-		canvas: Hex;
+		canvas: string[];
 		options: string[][];
 	}[];
 	authorization: {
@@ -73,7 +73,7 @@ type MintRelayRequest = {
 
 const getMintParams = (cartItem: StuffItemCart) => ({
 	author: cartItem.author,
-	canvas: cartItem.canvas as Hex,
+	canvas: cartItem.canvas,
 	description: cartItem.description,
 	options: cartItem.options,
 	title: cartItem.title,

@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { GridPreview } from "@/features/grid/gridPreview";
-import { decodeCanvasToPixels } from "@/features/grid/utils";
 import { Box } from "@/primitives/box";
+import { useStuffEcosystem } from "@/providers/stuff-ecosystem";
 import { useStuffItems } from "@/queries/useStuffItems";
 
 const INITIAL_VISIBLE_COUNT = 36;
@@ -12,6 +12,7 @@ const LOAD_MORE_COUNT = 24;
 const StuffWall = () => {
 	const [limit, setLimit] = useState(INITIAL_VISIBLE_COUNT);
 	const sentinelRef = useRef<HTMLDivElement | null>(null);
+	const { decodeCanvasToPixels } = useStuffEcosystem();
 	const { q, stuffItems } = useStuffItems({ limit });
 	const hasMore = (q.data?.length ?? 0) >= limit;
 
@@ -39,7 +40,7 @@ const StuffWall = () => {
 		<Box className="grid gap-4">
 			<Box className="grid grid-cols-2 gap-0 desktop:grid-cols-7">
 				{stuffItems.map((stuffItem) => {
-					const pixels = decodeCanvasToPixels(stuffItem.canvas, stuffItem.collection.palette);
+					const pixels = decodeCanvasToPixels(stuffItem.canvas);
 
 					return (
 						<GridPreview

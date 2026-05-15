@@ -3,13 +3,18 @@ import { onchainTable, primaryKey } from "ponder";
 
 type StuffCollection = StuffCollectionERC721.StuffCollection;
 
+const pantone = onchainTable("pantone", (t) => ({
+	pantone: t.text().primaryKey().notNull(),
+	hexValue: t.text().notNull(),
+	cmyk: t.text().notNull(),
+}));
+
 const stuffCollection = onchainTable("stuffCollection", (t) => ({
 	id: t.bigint().primaryKey().notNull(),
 	address: t.hex().notNull(),
 	sku: t.text().notNull(),
 	category: t.text().notNull(),
 	metadataURI: t.text().notNull(),
-	palette: t.jsonb().$type<string[]>().notNull(),
 	options: t.jsonb().$type<string[][]>().notNull(),
 	paymentToken: t.hex().notNull(),
 	paymentRecipient: t.hex().notNull(),
@@ -29,7 +34,7 @@ const stuffItem = onchainTable(
 		title: t.text().notNull(),
 		description: t.text().notNull(),
 		creationDate: t.bigint().notNull(),
-		canvas: t.hex().notNull(),
+		canvas: t.jsonb().$type<string[]>().notNull(),
 		options: t.jsonb().$type<string[][]>().notNull(),
 	}),
 	(table) => ({
@@ -38,9 +43,10 @@ const stuffItem = onchainTable(
 );
 
 namespace SubgraphTypes {
+	export type Pantone = typeof pantone.$inferSelect;
 	export type StuffCollection = typeof stuffCollection.$inferSelect;
 	export type StuffItem = typeof stuffItem.$inferSelect;
 }
 
 export type { StuffCollection, SubgraphTypes };
-export { stuffCollection, stuffItem };
+export { pantone, stuffCollection, stuffItem };

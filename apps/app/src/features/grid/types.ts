@@ -1,14 +1,33 @@
+import type { MainColors } from "@/config/types";
+
 type GridProps = {
 	size?: number;
 	palettes: string[];
 	pixels: string[];
 	onPixelsChange: (pixels: string[]) => void;
+	mainColors?: MainColors;
+	templates?: GridTemplate[];
+};
+
+type GridTemplate = {
+	id: string;
+	name: string;
+	description: string;
+	pixels: string[];
 };
 
 type PalettePickerProps = {
 	palettes: string[];
+	colorUsage: Record<string, number>;
 	selectedColor: string;
 	onSelectColor: (color: string) => void;
+	onReplaceColor: (fromColor: string, toColor: string) => void;
+};
+
+type GridTemplatePickerProps = {
+	templates: GridTemplate[];
+	activeTemplateId?: string;
+	onApplyTemplate: (template: GridTemplate) => void;
 };
 
 type PixelCanvasProps = {
@@ -37,6 +56,8 @@ type GridHistoryControlsProps = {
 
 export type {
 	BrushSizeControlProps,
+	GridTemplate,
+	GridTemplatePickerProps,
 	GridHistoryControlsProps,
 	GridProps,
 	PalettePickerProps,
